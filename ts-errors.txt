@@ -1,0 +1,62 @@
+src/actions/admin/inventory.actions.ts(8,85): error TS6133: 'reason' is declared but its value is never read.
+src/actions/admin/inventory.actions.ts(41,11): error TS2353: Object literal may only specify known properties, and 'adminUserId' does not exist in type 'Without<InventoryTransactionCreateInput, InventoryTransactionUncheckedCreateInput> & InventoryTransactionUncheckedCreateInput'.
+src/actions/admin/order.actions.ts(39,8): error TS2532: Object is possibly 'undefined'.
+src/actions/admin/order.actions.ts(53,7): error TS2375: Type '{ adminUserId: string | undefined; action: "ORDER_STATUS_CHANGED"; summary: string; entityType: string; entityId: string; }' is not assignable to type '(Without<AuditLogCreateInput, AuditLogUncheckedCreateInput> & AuditLogUncheckedCreateInput) | (Without<...> & AuditLogCreateInput)' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ adminUserId: string | undefined; action: "ORDER_STATUS_CHANGED"; summary: string; entityType: string; entityId: string; }' is not assignable to type 'Without<AuditLogUncheckedCreateInput, AuditLogCreateInput> & AuditLogCreateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ adminUserId: string | undefined; action: "ORDER_STATUS_CHANGED"; summary: string; entityType: string; entityId: string; }' is not assignable to type 'Without<AuditLogUncheckedCreateInput, AuditLogCreateInput>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'adminUserId' are incompatible.
+        Type 'string | undefined' is not assignable to type 'never'.
+          Type 'undefined' is not assignable to type 'never'.
+src/actions/admin/review.actions.ts(22,7): error TS2375: Type '{ adminUserId: string | undefined; action: any; summary: string; entityType: string; entityId: string; }' is not assignable to type '(Without<AuditLogCreateInput, AuditLogUncheckedCreateInput> & AuditLogUncheckedCreateInput) | (Without<...> & AuditLogCreateInput)' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ adminUserId: string | undefined; action: any; summary: string; entityType: string; entityId: string; }' is not assignable to type 'Without<AuditLogUncheckedCreateInput, AuditLogCreateInput> & AuditLogCreateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ adminUserId: string | undefined; action: any; summary: string; entityType: string; entityId: string; }' is not assignable to type 'Without<AuditLogUncheckedCreateInput, AuditLogCreateInput>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'adminUserId' are incompatible.
+        Type 'string | undefined' is not assignable to type 'never'.
+          Type 'undefined' is not assignable to type 'never'.
+src/actions/admin/review.actions.ts(24,29): error TS2339: Property 'REVIEW_MODERATED' does not exist on type '{ LOGIN: "LOGIN"; LOGOUT: "LOGOUT"; ORDER_STATUS_CHANGED: "ORDER_STATUS_CHANGED"; REFUND_ISSUED: "REFUND_ISSUED"; STOCK_ADJUSTMENT: "STOCK_ADJUSTMENT"; RETURN_APPROVED: "RETURN_APPROVED"; ... 6 more ...; CATALOG_SYNCED: "CATALOG_SYNCED"; }'.
+src/actions/auth/auth.actions.ts(67,9): error TS2375: Type '{ name: string; phone: string | undefined; password: string; isGuest: false; }' is not assignable to type '(Without<CustomerUpdateInput, CustomerUncheckedUpdateInput> & CustomerUncheckedUpdateInput) | (Without<...> & CustomerUpdateInput)' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ name: string; phone: string | undefined; password: string; isGuest: false; }' is not assignable to type 'Without<CustomerUncheckedUpdateInput, CustomerUpdateInput> & CustomerUpdateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ name: string; phone: string | undefined; password: string; isGuest: false; }' is not assignable to type 'CustomerUpdateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'phone' are incompatible.
+        Type 'string | undefined' is not assignable to type 'string | NullableStringFieldUpdateOperationsInput | null'.
+          Type 'undefined' is not assignable to type 'string | NullableStringFieldUpdateOperationsInput | null'.
+src/actions/auth/auth.actions.ts(77,9): error TS2375: Type '{ name: string; email: string; phone: string | undefined; password: string; isGuest: false; }' is not assignable to type '(Without<CustomerCreateInput, CustomerUncheckedCreateInput> & CustomerUncheckedCreateInput) | (Without<...> & CustomerCreateInput)' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ name: string; email: string; phone: string | undefined; password: string; isGuest: false; }' is not assignable to type 'Without<CustomerUncheckedCreateInput, CustomerCreateInput> & CustomerCreateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ name: string; email: string; phone: string | undefined; password: string; isGuest: false; }' is not assignable to type 'CustomerCreateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'phone' are incompatible.
+        Type 'string | undefined' is not assignable to type 'string | null'.
+          Type 'undefined' is not assignable to type 'string | null'.
+src/actions/checkout/checkout.actions.ts(48,7): error TS2375: Type '{ email: string; phone: string | undefined; isGuest: true; }' is not assignable to type '(Without<CustomerCreateInput, CustomerUncheckedCreateInput> & CustomerUncheckedCreateInput) | (Without<...> & CustomerCreateInput)' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ email: string; phone: string | undefined; isGuest: true; }' is not assignable to type 'Without<CustomerUncheckedCreateInput, CustomerCreateInput> & CustomerCreateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ email: string; phone: string | undefined; isGuest: true; }' is not assignable to type 'CustomerCreateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'phone' are incompatible.
+        Type 'string | undefined' is not assignable to type 'string | null'.
+          Type 'undefined' is not assignable to type 'string | null'.
+src/app/(store)/cart/page.tsx(18,17): error TS2322: Type '{ children: Element; asChild: true; }' is not assignable to type 'IntrinsicAttributes & ButtonProps & VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; secondary: string; ghost: string; destructive: string; link: string; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+  Property 'asChild' does not exist on type 'IntrinsicAttributes & ButtonProps & VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; secondary: string; ghost: string; destructive: string; link: string; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+src/app/(store)/cart/page.tsx(102,23): error TS2322: Type '{ children: Element; asChild: true; className: string; size: "lg"; }' is not assignable to type 'IntrinsicAttributes & ButtonProps & VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; secondary: string; ghost: string; destructive: string; link: string; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+  Property 'asChild' does not exist on type 'IntrinsicAttributes & ButtonProps & VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; secondary: string; ghost: string; destructive: string; link: string; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+src/app/(store)/checkout/success/page.tsx(40,17): error TS2322: Type '{ children: Element; asChild: true; size: "lg"; }' is not assignable to type 'IntrinsicAttributes & ButtonProps & VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; secondary: string; ghost: string; destructive: string; link: string; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+  Property 'asChild' does not exist on type 'IntrinsicAttributes & ButtonProps & VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; secondary: string; ghost: string; destructive: string; link: string; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+src/app/api/webhooks/razorpay/route.ts(7,1): error TS6133: 'updatePaymentStatusByProviderId' is declared but its value is never read.
+src/app/api/webhooks/razorpay/route.ts(72,36): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/app/api/webhooks/razorpay/route.ts(104,36): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/auth.config.ts(60,3): error TS1360: Type '{ pages: { signIn: string; }; providers: never[]; callbacks: { authorized({ auth, request: { nextUrl } }: { request: NextRequest; auth: Session | null; }): boolean | Response; jwt({ token, user }: { ...; }): Promise<...>; session({ session, token }: { ...; } & ... 1 more ... & { ...; }): Promise<...>; }; session: { ...' does not satisfy the expected type 'NextAuthConfig'.
+  Types of property 'secret' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string | string[]'.
+      Type 'undefined' is not assignable to type 'string | string[]'.
+src/auth.ts(10,61): error TS2345: Argument of type '{ providers: CredentialsConfig<Record<string, CredentialInput>>[]; pages: { signIn: string; }; callbacks: { authorized({ auth, request: { nextUrl } }: { request: NextRequest; auth: Session | null; }): boolean | Response; jwt({ token, user }: { ...; }): Promise<...>; session({ session, token }: { ...; } & ... 1 more ...' is not assignable to parameter of type 'NextAuthConfig | ((request: NextRequest | undefined) => Awaitable<NextAuthConfig>)'.
+  Type '{ providers: CredentialsConfig<Record<string, CredentialInput>>[]; pages: { signIn: string; }; callbacks: { authorized({ auth, request: { nextUrl } }: { request: NextRequest; auth: Session | null; }): boolean | Response; jwt({ token, user }: { ...; }): Promise<...>; session({ session, token }: { ...; } & ... 1 more ...' is not assignable to type 'NextAuthConfig' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'secret' are incompatible.
+      Type 'string | undefined' is not assignable to type 'string | string[]'.
+        Type 'undefined' is not assignable to type 'string | string[]'.
+src/components/admin/order-status-updater.tsx(21,56): error TS2322: Type '(value: string) => void' is not assignable to type '(value: "PENDING" | "CONFIRMED" | "PACKED" | "SHIPPED" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED" | "RETURNED" | null, eventDetails: SelectRootChangeEventDetails) => void'.
+  Types of parameters 'value' and 'value' are incompatible.
+    Type 'string | null' is not assignable to type 'string'.
+      Type 'null' is not assignable to type 'string'.
+src/components/store/add-to-cart-button.tsx(23,13): error TS2379: Argument of type '{ sanityProductId: string; name: string; price: number; imageUrl: string | undefined; quantity: number; }' is not assignable to parameter of type 'CartItem' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'imageUrl' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.

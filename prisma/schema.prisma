@@ -1,0 +1,613 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// -----------------------------------------------------------------------------
+// CUSTOMER DOMAIN
+// -----------------------------------------------------------------------------
+model Customer {
+  id       String  @id @default(uuid())
+  email    String  @unique
+  phone    String? @unique
+  name     String?
+  password String? // For traditional auth, optional for OAuth/Guest
+
+  isGuest       Boolean   @default(true)
+  isActive      Boolean   @default(true)
+  emailVerified DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  addresses         Address[]
+  orders            Order[] // Deletions restricted in DB
+  reviews           Review[]
+  couponRedemptions CouponRedemption[]
+  returns           Return[]
+
+  @@index([email])
+  @@index([phone])
+  @@map("customers")
+}
+
+model Address {
+  id         String   @id @default(uuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  recipientName String
+  phoneNumber   String
+
+  addressLine1 String
+  addressLine2 String?
+  landmark     String?
+  city         String
+  state        String
+  postalCode   String
+  country      String  @default("IN")
+
+  label     String? // e.g. "HOME", "WORK", "OFFICE"
+  isDefault Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@map("addresses")
+}
+
+// -----------------------------------------------------------------------------
+// ORDER DOMAIN (Immutable Financial Records)
+// -----------------------------------------------------------------------------
+model Order {
+  id          String   @id @default(uuid())
+  orderNumber String   @unique // e.g., ORD-2024-XXXX
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  status OrderStatus @default(PENDING)
+
+  // Historical Snapshots
+  customerEmailSnap   String
+  customerPhoneSnap   String?
+  shippingAddressSnap Json
+  billingAddressSnap  Json?
+
+  // Frozen Pricing Snapshots
+  subtotal      Int // Stored in cents/paise
+  discountTotal Int @default(0)
+  taxTotal      Int @default(0)
+  shippingFee   Int @default(0)
+  grandTotal    Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  items            OrderItem[]
+  payments         Payment[]
+  shipments        Shipment[]
+  returns          Return[]
+  inventoryTxns    InventoryTransaction[]
+  couponRedemption CouponRedemption?
+
+  @@index([customerId, createdAt(sort: Desc)])
+  @@index([orderNumber])
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PACKED
+  SHIPPED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+model OrderItem {
+  id      String @id @default(uuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // Sanity Snapshot Strategy
+  sanityProductId  String?
+  productNameSnap  String
+  productSkuSnap   String?
+  productImageSnap String?
+  unitPrice        Int
+  quantity         Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  returnItems ReturnItem[]
+  reviews     Review[]
+
+  @@map("order_items")
+}
+
+model Payment {
+  id      String @id @default(uuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  provider          String // e.g., "RAZORPAY"
+  providerOrderId   String?
+  providerPaymentId String? @unique
+  providerSignature String?
+
+  amount       Int
+  currency     String        @default("INR")
+  status       PaymentStatus @default(PENDING)
+  errorMessage String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  refunds Refund[]
+
+  @@index([orderId])
+  @@index([providerPaymentId])
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+model Refund {
+  id        String  @id @default(uuid())
+  paymentId String
+  payment   Payment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+
+  returnId String?
+  return   Return? @relation(fields: [returnId], references: [id], onDelete: SetNull)
+
+  amount           Int
+  providerRefundId String       @unique
+  status           RefundStatus @default(PENDING)
+  reason           String?
+
+  createdAt DateTime @default(now())
+
+  @@index([paymentId])
+  @@map("refunds")
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+// -----------------------------------------------------------------------------
+// INVENTORY DOMAIN
+// -----------------------------------------------------------------------------
+model Inventory {
+  id              String @id @default(uuid())
+  sanityProductId String @unique
+
+  availableStock    Int @default(0)
+  reservedStock     Int @default(0)
+  lowStockThreshold Int @default(5)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions InventoryTransaction[]
+
+  @@index([sanityProductId])
+  @@map("inventory")
+}
+
+model InventoryTransaction {
+  id          String    @id @default(uuid())
+  inventoryId String
+  inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Restrict)
+
+  quantityChange Int
+  reason         TxnReason
+  orderId        String?
+  order          Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([inventoryId, createdAt(sort: Desc)])
+  @@map("inventory_transactions")
+}
+
+enum TxnReason {
+  RESTOCK
+  ORDER_RESERVATION
+  RESERVATION_RELEASE
+  ORDER_FULFILLMENT
+  RETURN_RESTOCK
+  MANUAL_ADJUSTMENT
+}
+
+// -----------------------------------------------------------------------------
+// TRACKING DOMAIN
+// -----------------------------------------------------------------------------
+model Shipment {
+  id      String @id @default(uuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  courierName    String // e.g. "Delhivery", "Blue Dart"
+  trackingNumber String? @unique
+  trackingUrl    String? // Optional direct link to courier
+
+  status ShipmentStatus @default(PENDING)
+
+  estimatedDeliveryDate DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  events TrackingEvent[]
+
+  @@index([orderId])
+  @@index([trackingNumber])
+  @@map("shipments")
+}
+
+enum ShipmentStatus {
+  PENDING
+  SHIPPED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  RETURNED
+  FAILED_DELIVERY
+}
+
+model TrackingEvent {
+  id         String   @id @default(uuid())
+  shipmentId String
+  shipment   Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  status      String // e.g., "Reached Hub"
+  location    String? // e.g., "Mumbai Sorting Center"
+  description String? // e.g., "Package delayed due to weather"
+  timestamp   DateTime @default(now())
+
+  @@index([shipmentId, timestamp(sort: Desc), status])
+  @@map("tracking_events")
+}
+
+// -----------------------------------------------------------------------------
+// REVIEW DOMAIN
+// -----------------------------------------------------------------------------
+model Review {
+  id              String @id @default(uuid())
+  sanityProductId String
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  orderItemId String?
+  orderItem   OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+
+  rating  Int
+  title   String?
+  comment String?
+
+  status ReviewStatus @default(PENDING)
+
+  images       Json?
+  helpfulVotes Int     @default(0)
+  adminReply   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([customerId, orderItemId])
+  @@index([sanityProductId, status])
+  @@index([customerId])
+  @@map("reviews")
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model ProductRating {
+  sanityProductId String   @id
+  averageRating   Float    @default(0)
+  reviewCount     Int      @default(0)
+  updatedAt       DateTime @updatedAt
+
+  @@map("product_ratings")
+}
+
+// -----------------------------------------------------------------------------
+// MARKETING & PROMOTION DOMAIN
+// -----------------------------------------------------------------------------
+model Coupon {
+  id   String @id @default(uuid())
+  code String @unique
+
+  discountType  DiscountType
+  discountValue Int
+
+  minOrderValue Int?
+  maxDiscount   Int?
+
+  usageLimit       Int?
+  perCustomerLimit Int?
+  cachedUsageCount Int  @default(0)
+
+  isActive  Boolean   @default(true)
+  startDate DateTime?
+  endDate   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  redemptions CouponRedemption[]
+
+  @@map("coupons")
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+model CouponRedemption {
+  id       String @id @default(uuid())
+  couponId String
+  coupon   Coupon @relation(fields: [couponId], references: [id], onDelete: Restrict)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // Lifecycle: RESERVED at PENDING order, CONFIRMED at webhook CAPTURED, ROLLED_BACK on failure
+  status          CouponRedemptionStatus @default(RESERVED)
+  reservedUntil   DateTime? // Set to NOW() + 30min at creation. Cleanup job rolls back expired RESERVED rows.
+  discountApplied Int
+  createdAt       DateTime               @default(now())
+
+  @@index([couponId, customerId])
+  @@map("coupon_redemptions")
+}
+
+enum CouponRedemptionStatus {
+  RESERVED // Coupon locked at PENDING order creation
+  CONFIRMED // Permanently applied after payment CAPTURED webhook
+  ROLLED_BACK // Released on payment failure
+}
+
+// -----------------------------------------------------------------------------
+// RETURNS DOMAIN
+// -----------------------------------------------------------------------------
+model Return {
+  id      String @id @default(uuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  type   ReturnType
+  status ReturnStatus @default(REQUESTED)
+
+  reason        String
+  customerNotes String?
+  adminNotes    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  returnItems ReturnItem[]
+  refunds     Refund[]
+
+  @@index([orderId])
+  @@index([customerId])
+  @@index([status])
+  @@map("returns")
+}
+
+model ReturnItem {
+  id       String @id @default(uuid())
+  returnId String
+  return   Return @relation(fields: [returnId], references: [id], onDelete: Cascade)
+
+  orderItemId String
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
+
+  quantity  Int
+  condition String?
+
+  @@map("return_items")
+}
+
+enum ReturnType {
+  RETURN_FOR_REFUND
+  REFUND_ONLY
+  REPLACEMENT
+}
+
+enum ReturnStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  ITEM_RECEIVED
+  REFUND_PROCESSED
+  REPLACEMENT_SENT
+  CLOSED
+}
+
+// -----------------------------------------------------------------------------
+// SYSTEM & ADMIN DOMAIN
+// -----------------------------------------------------------------------------
+model AdminUser {
+  id       String  @id @default(uuid())
+  fullName String
+  email    String  @unique
+  password String? // Optional if using purely OAuth
+
+  roleId String
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  status      AdminStatus @default(ACTIVE)
+  lastLoginAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  auditLogs AuditLog[]
+
+  @@map("admin_users")
+}
+
+enum AdminStatus {
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+model Role {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+  isSystem    Boolean @default(false) // If true, cannot be deleted (e.g. Owner)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  admins      AdminUser[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model RolePermission {
+  id     String @id @default(uuid())
+  roleId String
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  module  String // e.g. "ORDERS", "PRODUCTS", "SETTINGS"
+  actions Json // e.g. ["VIEW", "CREATE", "UPDATE", "DELETE"]
+
+  @@unique([roleId, module])
+  @@map("role_permissions")
+}
+
+model AuditLog {
+  id String @id @default(uuid())
+
+  adminUserId String?
+  adminUser   AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+  ipAddress   String?
+  userAgent   String?
+
+  action  AuditAction
+  summary String
+
+  entityType String?
+  entityId   String?
+
+  details Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([adminUserId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  ORDER_STATUS_CHANGED
+  REFUND_ISSUED
+  STOCK_ADJUSTMENT
+  RETURN_APPROVED
+  RETURN_REJECTED
+  COUPON_CREATED
+  COUPON_UPDATED
+  ADMIN_CREATED
+  ROLE_CHANGED
+  SETTINGS_UPDATED
+  CATALOG_SYNCED
+  BULK_IMPORT
+}
+
+// -----------------------------------------------------------------------------
+// BULK IMPORT DOMAIN
+// -----------------------------------------------------------------------------
+model ImportLock {
+  id        Int       @id @default(1)
+  isLocked  Boolean   @default(false)
+  lockedBy  String?   // Admin User ID
+  lockedAt  DateTime?
+
+  @@map("import_locks")
+}
+
+model InventoryRetryQueue {
+  sanityProductId String   @id
+  pendingStock    Int
+  attempts        Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  @@map("inventory_retry_queue")
+}
+
+// -----------------------------------------------------------------------------
+// NOTIFICATION & EMAIL DOMAIN
+// -----------------------------------------------------------------------------
+model EmailLog {
+  id String @id @default(uuid())
+
+  recipientEmail String
+  subject        String
+  templateName   String?
+  
+  // E.g., ORDER_CONFIRMATION_ORD-123. Used to prevent duplicate sends for the same event
+  idempotencyKey String? @unique
+
+  status       EmailStatus @default(PENDING)
+  providerId   String?     // E.g. Resend message ID
+  errorMessage String?
+
+  // Linking to the entity
+  entityType String? // e.g. "Order", "Customer"
+  entityId   String? // e.g. order.id
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([recipientEmail])
+  @@index([entityType, entityId])
+  @@index([status])
+  @@map("email_logs")
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+}
