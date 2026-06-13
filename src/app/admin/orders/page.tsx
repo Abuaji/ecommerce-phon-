@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/auth-utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { OrderStatusUpdater } from "@/components/admin/order-status-updater";
+import { SendEmailModal } from "@/components/admin/send-email-modal";
 
 export default async function OrdersPage() {
   await requirePermission("ORDERS", "VIEW");
@@ -27,6 +28,7 @@ export default async function OrdersPage() {
               <TableHead>Date</TableHead>
               <TableHead>Total</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -39,11 +41,14 @@ export default async function OrdersPage() {
                 <TableCell>
                   <OrderStatusUpdater orderId={order.id} currentStatus={order.status} />
                 </TableCell>
+                <TableCell className="text-right">
+                  <SendEmailModal recipientEmail={order.customerEmailSnap} />
+                </TableCell>
               </TableRow>
             ))}
             {orders.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                   No orders found.
                 </TableCell>
               </TableRow>

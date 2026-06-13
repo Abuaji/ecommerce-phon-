@@ -7,14 +7,14 @@ export interface ImportRow {
   sku: string;
   name: string;
   category: string;
-  brand?: string;
+  brand?: string | undefined;
   price: number;
-  mrp?: number;
+  mrp?: number | undefined;
   stock: number;
-  description?: string;
-  mainImage?: string;
-  image2?: string;
-  image3?: string;
+  description?: string | undefined;
+  mainImage?: string | undefined;
+  image2?: string | undefined;
+  image3?: string | undefined;
   active: boolean;
 }
 
@@ -65,12 +65,10 @@ export class ImportService {
     };
 
     // Fetch active categories and brands for validation
-    const categories = await writeClient.fetch(`*[_type == "category"]{name, _id}`);
-    const brands = await writeClient.fetch(`*[_type == "brand"]{name, _id}`);
+
     const existingProducts = await writeClient.fetch(`*[_type == "product"]{sku, _id}`);
 
-    const categoryMap = new Map(categories.map((c: any) => [c.name.toLowerCase(), c._id]));
-    const brandMap = new Map(brands.map((b: any) => [b.name.toLowerCase(), b._id]));
+
     const skuMap = new Map(existingProducts.map((p: any) => [p.sku, p._id]));
 
     // Check for duplicate SKUs within the sheet itself
@@ -95,17 +93,7 @@ export class ImportService {
       }
       seenSkus.add(row.sku);
 
-      if (row.category && !categoryMap.has(row.category.toLowerCase())) {
-        result.willFail++;
-        result.failures.push({ row: rowNum, sku: row.sku, reason: `Category '${row.category}' not found in Sanity` });
-        continue;
-      }
-
-      if (row.brand && !brandMap.has(row.brand.toLowerCase())) {
-        result.willFail++;
-        result.failures.push({ row: rowNum, sku: row.sku, reason: `Brand '${row.brand}' not found in Sanity` });
-        continue;
-      }
+      // We no longer fail if category/brand is missing, we auto-create them during execution.
 
       // If valid, determine if Create or Update
       if (skuMap.has(row.sku)) {
@@ -148,9 +136,32 @@ export class ImportService {
         const isUpdate = skuMap.has(row.sku);
         const sanityProductId = isUpdate ? skuMap.get(row.sku) : undefined;
 
-        // Resolve references
-        const categoryId = row.category ? categoryMap.get(row.category.toLowerCase()) : undefined;
-        const brandId = row.brand ? brandMap.get(row.brand.toLowerCase()) : undefined;
+        // Resolve references, creating them if they don't exist
+        let categoryId = row.category ? categoryMap.get(row.category.toLowerCase()) : undefined;
+        if (row.category && !categoryId) {
+          const slug = row.category.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+          const createdCat = await writeClient.create({
+            _type: "category",
+            name: row.category,
+            slug: { _type: "slug", current: slug },
+            isActive: true,
+            level: 1,
+          });
+          categoryId = createdCat._id;
+          categoryMap.set(row.category.toLowerCase(), categoryId);
+        }
+
+        let brandId = row.brand ? brandMap.get(row.brand.toLowerCase()) : undefined;
+        if (row.brand && !brandId) {
+          const slug = row.brand.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+          const createdBrand = await writeClient.create({
+            _type: "brand",
+            name: row.brand,
+            slug: { _type: "slug", current: slug },
+          });
+          brandId = createdBrand._id;
+          brandMap.set(row.brand.toLowerCase(), brandId);
+        }
 
         // Base Sanity Document
         const sanityDoc: any = {
@@ -207,9 +218,7 @@ export class ImportService {
           updatedCount++;
         } else {
           sanityDoc.slug = { _type: "slug", current: row.sku.toLowerCase().replace(/[^a-z0-9]+/g, "-") };
-          if (!sanityDoc.mainImage) {
-            throw new Error("New products must have a main image.");
-          }
+          // Removed strict mainImage check so products can be uploaded without images
           const created = await writeClient.create(sanityDoc);
           finalSanityId = created._id;
           createdCount++;

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { fulfillReservedStock, releaseReservedStock } from "@/server/repositories/inventory.repository";
 import { confirmCouponRedemption, rollbackCouponRedemption } from "@/server/repositories/coupon.repository";
 import { updateOrderStatus } from "@/server/repositories/order.repository";
-import { updatePaymentStatusByProviderId } from "@/server/repositories/payment.repository";
+
 import { PaymentStatus, OrderStatus, AuditAction } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
@@ -82,6 +82,20 @@ export async function POST(req: NextRequest) {
           details: { providerPaymentId },
         },
       });
+
+      // 3e. Automated Emails
+      const settings = await prisma.storeSetting.findMany();
+      const isConfirmEnabled = settings.find(s => s.key === "enable_order_confirm_emails")?.value === "true";
+      if (isConfirmEnabled && payment.order.customerEmailSnap) {
+        // Need to import EmailService at the top
+        const { EmailService } = await import("@/server/services/email.service");
+        await EmailService.sendOrderConfirmation(
+          payment.orderId,
+          payment.order.orderNumber,
+          payment.order.customerEmailSnap,
+          payment.order.grandTotal
+        );
+      }
 
     } else if (event === "payment.failed") {
       // 4a. Update Payment

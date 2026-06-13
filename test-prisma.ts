@@ -18,7 +18,7 @@ async function main() {
       take: 50,
     });
     console.log("Success! Orders:", orders.length);
-  } catch (e) {
+  } catch (e: any) {
     console.error("ERROR TYPE:", e.name);
     console.error("ERROR MESSAGE:", e.message);
   } finally {

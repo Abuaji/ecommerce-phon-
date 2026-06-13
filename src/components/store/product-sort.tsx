@@ -14,7 +14,8 @@ export function ProductSort() {
   const searchParams = useSearchParams();
   const currentSort = searchParams.get("sort") || "featured";
 
-  const handleSortChange = (value: string) => {
+  const handleSortChange = (value: string | null) => {
+    if (!value) return;
     const params = new URLSearchParams(searchParams.toString());
     params.set("sort", value);
     router.push(`?${params.toString()}`);

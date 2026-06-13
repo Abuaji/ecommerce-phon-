@@ -66,7 +66,7 @@ export async function registerCustomer(data: RegisterCustomerInput) {
         where: { email },
         data: {
           name,
-          phone,
+          ...(phone !== undefined && { phone }),
           password: hashedPassword,
           isGuest: false,
         },
@@ -77,7 +77,7 @@ export async function registerCustomer(data: RegisterCustomerInput) {
         data: {
           name,
           email,
-          phone,
+          ...(phone !== undefined && { phone }),
           password: hashedPassword,
           isGuest: false,
         },

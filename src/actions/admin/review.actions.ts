@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/auth-utils";
-import { ReviewStatus, AuditAction } from "@prisma/client";
+import { ReviewStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export async function adminModerateReview(reviewId: string, action: "APPROVE" | "REJECT") {

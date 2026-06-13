@@ -2,12 +2,12 @@ import Link from "next/link";
 
 export function StoreFooter() {
   return (
-    <footer className="border-t border-border bg-white">
+    <footer className="border-t border-border/20 bg-background">
       <div className="container mx-auto px-4 py-16 md:py-24">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
           <div className="col-span-2 md:col-span-1">
-            <h3 className="text-xl font-bold tracking-widest uppercase mb-6 text-foreground">Lumina</h3>
-            <p className="text-sm leading-relaxed text-muted-foreground">
+            <h3 className="text-xl font-sans font-medium tracking-tight uppercase mb-6 text-foreground">Antigravity</h3>
+            <p className="text-sm leading-relaxed text-muted-foreground font-sans">
               Premium mobile accessories designed for the modern lifestyle.
             </p>
           </div>
@@ -57,9 +57,9 @@ export function StoreFooter() {
             </ul>
           </div>
         </div>
-        <div className="mt-20 pt-8 border-t border-border flex flex-col justify-between items-center gap-4">
-          <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
-            © {new Date().getFullYear()} Lumina. All rights reserved.
+        <div className="mt-20 pt-8 border-t border-border/20 flex flex-col justify-between items-center gap-4">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            © {new Date().getFullYear()} Antigravity. All rights reserved.
           </p>
         </div>
       </div>

@@ -2,7 +2,7 @@ import { AuditRepository } from "@/server/repositories/audit.repository";
 import { AuditAction } from "@prisma/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDistanceToNow } from "date-fns";
-import { Badge } from "@/components/ui/badge";
+
 import { CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";

@@ -4,6 +4,7 @@ import { readClient } from "@/sanity/lib/client";
 import { ALL_PRODUCTS_QUERY } from "@/sanity/queries";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ProductRowActions } from "@/components/admin/product-row-actions";
 
 export default async function ProductsPage() {
   await requirePermission("PRODUCTS", "VIEW");
@@ -50,9 +51,7 @@ export default async function ProductsPage() {
                 <TableCell>{product.brand}</TableCell>
                 <TableCell>₹{product.price?.toLocaleString()}</TableCell>
                 <TableCell className="text-right">
-                  <Link href={`/admin/studio`} className="text-sm text-primary hover:underline">
-                    Edit
-                  </Link>
+                  <ProductRowActions product={product} />
                 </TableCell>
               </TableRow>
             ))}

@@ -19,6 +19,7 @@ export function CheckoutForm() {
   const { items, getSubtotal, clearCart } = useCartStore();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const [paymentMethod, setPaymentMethod] = useState<"RAZORPAY" | "COD">("RAZORPAY");
 
   const [formData, setFormData] = useState({
     email: "",
@@ -68,6 +69,7 @@ export function CheckoutForm() {
           quantity: i.quantity,
           unitPrice: i.price,
         })),
+        paymentMethod,
       };
 
       // 2. Invoke Server Action
@@ -83,34 +85,39 @@ export function CheckoutForm() {
         return;
       }
 
-      // 3. Open Razorpay Modal
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholder",
-        amount: result.data.amount,
-        currency: result.data.currency,
-        name: "Mobile Accessories Store",
-        description: "Order Payment",
-        order_id: result.data.razorpayOrderId,
-        handler: function (response: any) {
-          // 4. On Success Callback
-          // Note: The actual source of truth is the webhook! This just redirects the user.
-          clearCart();
-          router.push(`/checkout/success?order_id=${result.data?.orderId}&payment_id=${response.razorpay_payment_id}`);
-        },
-        prefill: {
-          email: formData.email,
-          contact: formData.phone,
-        },
-        theme: {
-          color: "#0f172a",
-        },
-      };
+      if (paymentMethod === "RAZORPAY") {
+        // 3. Open Razorpay Modal
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholder",
+          amount: result.data.amount,
+          currency: result.data.currency,
+          name: "Mobile Accessories Store",
+          description: "Order Payment",
+          order_id: result.data.razorpayOrderId,
+          handler: function (response: any) {
+            // 4. On Success Callback
+            clearCart();
+            router.push(`/checkout/success?order_id=${result.data?.orderId}&payment_id=${response.razorpay_payment_id}`);
+          },
+          prefill: {
+            email: formData.email,
+            contact: formData.phone,
+          },
+          theme: {
+            color: "#0f172a",
+          },
+        };
 
-      const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', function (response: any) {
-        setError(response.error.description);
-      });
-      rzp.open();
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function (response: any) {
+          setError(response.error.description);
+        });
+        rzp.open();
+      } else {
+        // Handle COD Success
+        clearCart();
+        router.push(`/checkout/success?order_id=${result.data?.orderId}&payment_id=COD`);
+      }
     });
   };
 
@@ -162,8 +169,42 @@ export function CheckoutForm() {
         </div>
       </div>
 
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold border-b pb-2">Payment Method</h3>
+        <div className="flex flex-col gap-3">
+          <label className="flex items-center gap-3 cursor-pointer border p-4 rounded-md hover:bg-muted/50 transition-colors">
+            <input 
+              type="radio" 
+              name="paymentMethod" 
+              value="RAZORPAY" 
+              checked={paymentMethod === "RAZORPAY"} 
+              onChange={() => setPaymentMethod("RAZORPAY")} 
+              className="h-4 w-4 text-primary"
+            />
+            <div className="flex flex-col">
+              <span className="font-semibold text-sm">Online Payment (Razorpay)</span>
+              <span className="text-xs text-muted-foreground">Pay securely with Credit/Debit Card, UPI, or Netbanking.</span>
+            </div>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer border p-4 rounded-md hover:bg-muted/50 transition-colors">
+            <input 
+              type="radio" 
+              name="paymentMethod" 
+              value="COD" 
+              checked={paymentMethod === "COD"} 
+              onChange={() => setPaymentMethod("COD")} 
+              className="h-4 w-4 text-primary"
+            />
+            <div className="flex flex-col">
+              <span className="font-semibold text-sm">Cash on Delivery</span>
+              <span className="text-xs text-muted-foreground">Pay with cash when your order is delivered.</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
       <Button type="submit" size="lg" className="w-full" disabled={isPending}>
-        {isPending ? "Initializing Secure Checkout..." : `Pay ₹${(getSubtotal() / 100).toLocaleString()}`}
+        {isPending ? "Processing..." : paymentMethod === "RAZORPAY" ? `Pay ₹${(getSubtotal() / 100).toLocaleString()}` : "Complete Order (COD)"}
       </Button>
     </form>
   );

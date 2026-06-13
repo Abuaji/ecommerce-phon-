@@ -16,6 +16,45 @@ export const ALL_PRODUCTS_QUERY = `
   }
 `;
 
+export const NEW_ARRIVALS_QUERY = `
+  *[_type == "product" && isActive == true && isNewArrival == true] | order(_createdAt desc)[0...10] {
+    _id,
+    name,
+    "slug": slug.current,
+    "imageUrl": mainImage.asset->url,
+    "price": displayPrice,
+    "discountPrice": mrp,
+    "category": category->name,
+    "brand": brand->name
+  }
+`;
+
+export const TOP_SELLING_QUERY = `
+  *[_type == "product" && isActive == true && isTrending == true] | order(_createdAt desc)[0...10] {
+    _id,
+    name,
+    "slug": slug.current,
+    "imageUrl": mainImage.asset->url,
+    "price": displayPrice,
+    "discountPrice": mrp,
+    "category": category->name,
+    "brand": brand->name
+  }
+`;
+
+export const RELATED_PRODUCTS_QUERY = `
+  *[_type == "product" && isActive == true && category->name == $categoryName && _id != $currentProductId] | order(_createdAt desc)[0...10] {
+    _id,
+    name,
+    "slug": slug.current,
+    "imageUrl": mainImage.asset->url,
+    "price": displayPrice,
+    "discountPrice": mrp,
+    "category": category->name,
+    "brand": brand->name
+  }
+`;
+
 export const PRODUCT_BY_SLUG_QUERY = `
   *[_type == "product" && slug.current == $slug && isActive == true][0] {
     _id,
@@ -74,5 +113,30 @@ export const ALL_BRANDS_QUERY = `
     name,
     "slug": slug.current,
     "imageUrl": logo.asset->url
+  }
+`;
+
+export const PRODUCTS_BY_CATEGORY_QUERY = `
+  *[_type == "product" && category->slug.current == $slug && isActive == true] | order(_createdAt desc) {
+    _id,
+    name,
+    "slug": slug.current,
+    "imageUrl": mainImage.asset->url,
+    "price": displayPrice,
+    "discountPrice": mrp,
+    "category": category->name,
+    "brand": brand->name
+  }
+`;
+
+export const CATEGORY_BY_SLUG_QUERY = `
+  *[_type == "category" && slug.current == $slug && isActive == true][0] {
+    _id,
+    name,
+    "slug": slug.current,
+    "imageUrl": image.asset->url,
+    description,
+    seoTitle,
+    seoDescription
   }
 `;

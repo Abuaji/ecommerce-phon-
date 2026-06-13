@@ -10,13 +10,11 @@ export function MobileNav() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <button 
-          className="md:hidden p-2 text-muted-foreground hover:text-foreground"
-          aria-label="Open Menu"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
+      <SheetTrigger 
+        className="md:hidden p-2 text-muted-foreground hover:text-foreground"
+        aria-label="Open Menu"
+      >
+        <Menu className="h-5 w-5" />
       </SheetTrigger>
       <SheetContent side="left" className="w-[300px] sm:w-[400px]">
         <SheetHeader>

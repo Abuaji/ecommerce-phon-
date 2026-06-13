@@ -9,22 +9,24 @@ export default async function DashboardPage() {
   // Enforce RBAC
   await requirePermission("DASHBOARD", "VIEW");
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   // Fetch Stats Concurrently
-  const [revenueData, pendingOrdersCount, lowStockCount, recentLogs] = await Promise.all([
+  const [revenueData, ordersTodayCount, lowStockCount, recentOrders] = await Promise.all([
     prisma.payment.aggregate({
-      where: { status: PaymentStatus.CAPTURED },
+      where: { status: "CAPTURED" },
       _sum: { amount: true },
     }),
     prisma.order.count({
-      where: { status: OrderStatus.PENDING },
+      where: { createdAt: { gte: today } },
     }),
     prisma.inventory.count({
       where: { availableStock: { lt: 10 } },
     }),
-    prisma.auditLog.findMany({
+    prisma.order.findMany({
       take: 5,
       orderBy: { createdAt: "desc" },
-      include: { adminUser: true },
     }),
   ]);
 
@@ -34,7 +36,7 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
-        <p className="text-muted-foreground">Welcome to the Admin Dashboard.</p>
+        <p className="text-muted-foreground">Welcome to the Admin Dashboard. Here is what is happening today.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -44,17 +46,17 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">₹{totalRevenue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">From captured payments</p>
+            <p className="text-xs text-muted-foreground">Lifetime captured payments</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
+            <CardTitle className="text-sm font-medium">Orders Today</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingOrdersCount}</div>
-            <p className="text-xs text-muted-foreground">Orders awaiting processing</p>
+            <div className="text-2xl font-bold">{ordersTodayCount}</div>
+            <p className="text-xs text-muted-foreground">Orders placed since midnight</p>
           </CardContent>
         </Card>
 
@@ -71,32 +73,36 @@ export default async function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+          <CardTitle>Recent Orders</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Time</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Actor</TableHead>
-                <TableHead>Details</TableHead>
+                <TableHead>Order #</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Total</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recentLogs.map((log) => (
-                <TableRow key={log.id}>
-                  <TableCell className="whitespace-nowrap">{log.createdAt.toLocaleString()}</TableCell>
+              {recentOrders.map((order) => (
+                <TableRow key={order.id}>
+                  <TableCell className="font-medium">{order.orderNumber}</TableCell>
+                  <TableCell className="whitespace-nowrap">{order.createdAt.toLocaleDateString()}</TableCell>
+                  <TableCell>{order.customerEmailSnap}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{log.action}</Badge>
+                    <Badge variant="outline" className="bg-primary/10 text-primary border-transparent">
+                      {order.status}
+                    </Badge>
                   </TableCell>
-                  <TableCell>{log.adminUser?.fullName || "System"}</TableCell>
-                  <TableCell className="truncate max-w-[200px]">{log.summary}</TableCell>
+                  <TableCell className="text-right font-medium">₹{(order.grandTotal / 100).toLocaleString()}</TableCell>
                 </TableRow>
               ))}
-              {recentLogs.length === 0 && (
+              {recentOrders.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-4">No recent activity.</TableCell>
+                  <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">No recent orders found.</TableCell>
                 </TableRow>
               )}
             </TableBody>

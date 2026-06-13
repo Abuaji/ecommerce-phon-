@@ -32,7 +32,6 @@ export async function adminAdjustStock(inventoryId: string, quantityChange: numb
         },
       });
 
-      const session = await import("@/auth").then(m => m.auth());
       await tx.inventoryTransaction.create({
         data: {
           inventoryId,

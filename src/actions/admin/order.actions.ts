@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/auth-utils";
 import { OrderStatus, AuditAction } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { EmailService } from "@/server/services/email.service";
 
 export async function adminUpdateOrderStatus(orderId: string, newStatus: OrderStatus) {
   // 1. RBAC Verification
@@ -26,17 +27,19 @@ export async function adminUpdateOrderStatus(orderId: string, newStatus: OrderSt
   // OUT_FOR_DELIVERY -> DELIVERED
   // Only CANCELLED can happen from PENDING/CONFIRMED if payment fails or user cancels
   const validTransitions: Record<string, string[]> = {
-    PENDING: ["CANCELLED"],
-    CONFIRMED: ["PROCESSING", "CANCELLED"],
-    PROCESSING: ["SHIPPED", "CANCELLED"],
-    SHIPPED: ["OUT_FOR_DELIVERY", "RETURNED"], // RETURNED is usually post-delivery, but tracking might skip
+    PENDING: ["CONFIRMED", "CANCELLED"],          // COD orders: PENDING → CONFIRMED
+    CONFIRMED: ["PACKED", "PROCESSING", "CANCELLED"],
+    PROCESSING: ["PACKED", "SHIPPED", "CANCELLED"],
+    PACKED: ["SHIPPED", "CANCELLED"],
+    SHIPPED: ["OUT_FOR_DELIVERY", "RETURNED"],
     OUT_FOR_DELIVERY: ["DELIVERED", "RETURNED"],
     DELIVERED: ["RETURNED"],
     CANCELLED: [],
     RETURNED: [],
   };
 
-  if (!validTransitions[order.status].includes(newStatus)) {
+  const allowedTransitions = validTransitions[order.status];
+  if (!allowedTransitions || !allowedTransitions.includes(newStatus)) {
     return { error: `Invalid status transition from ${order.status} to ${newStatus}` };
   }
 
@@ -59,7 +62,21 @@ export async function adminUpdateOrderStatus(orderId: string, newStatus: OrderSt
       },
     });
 
-    // 6. Cache Revalidation
+    // 6. Automated Emails
+    const settings = await prisma.storeSetting.findMany();
+    const isConfirmEnabled = settings.find(s => s.key === "enable_order_confirm_emails")?.value === "true";
+    const isShippingEnabled = settings.find(s => s.key === "enable_shipping_emails")?.value === "true";
+    const isDeliveryEnabled = settings.find(s => s.key === "enable_delivery_emails")?.value === "true";
+
+    if (newStatus === "CONFIRMED" && isConfirmEnabled) {
+      await EmailService.sendOrderConfirmation(order.id, order.orderNumber, order.customerEmailSnap, order.grandTotal);
+    } else if (newStatus === "SHIPPED" && isShippingEnabled) {
+      await EmailService.sendShippingNotification(order.id, order.orderNumber, order.customerEmailSnap);
+    } else if (newStatus === "DELIVERED" && isDeliveryEnabled) {
+      await EmailService.sendDeliveryNotification(order.id, order.orderNumber, order.customerEmailSnap);
+    }
+
+    // 7. Cache Revalidation
     revalidatePath("/admin/orders");
     return { success: true };
   } catch (error) {

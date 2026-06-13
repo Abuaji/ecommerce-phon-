@@ -42,14 +42,14 @@ function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="p-3 text-sm text-red-500 bg-red-100 rounded-md">
+        <div className="p-4 text-sm font-medium text-white bg-red-500 rounded-none tracking-tight">
           {error}
         </div>
       )}
-      <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+      <div className="space-y-3">
+        <label htmlFor="email" className="text-[11px] uppercase tracking-widest font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           Email
         </label>
         <input
@@ -60,15 +60,15 @@ function LoginForm() {
           placeholder="admin@example.com"
           required
           disabled={isLoading}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-12 w-full rounded-none border border-border/40 bg-white px-4 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black disabled:cursor-not-allowed disabled:opacity-50 transition-colors hover:border-black"
         />
       </div>
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          <label htmlFor="password" className="text-[11px] uppercase tracking-widest font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Password
           </label>
-          <a href="#" className="text-sm font-medium text-primary hover:underline">
+          <a href="#" className="text-[10px] tracking-widest uppercase font-bold text-muted-foreground hover:text-black transition-colors">
             Forgot password?
           </a>
         </div>
@@ -79,13 +79,13 @@ function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
           disabled={isLoading}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-12 w-full rounded-none border border-border/40 bg-white px-4 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black disabled:cursor-not-allowed disabled:opacity-50 transition-colors hover:border-black"
         />
       </div>
       <button
         type="submit"
         disabled={isLoading}
-        className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full mt-4"
+        className="mt-8 flex h-12 w-full items-center justify-center whitespace-nowrap rounded-none bg-black text-[11px] uppercase tracking-[0.2em] font-bold text-white transition-colors hover:bg-black/90 disabled:pointer-events-none disabled:opacity-50"
       >
         {isLoading ? "Signing in..." : "Sign In"}
       </button>

@@ -9,6 +9,7 @@ export default async function CheckoutSuccessPage({
   const params = await searchParams;
   const orderId = params.order_id;
   const paymentId = params.payment_id;
+  const isCOD = paymentId === "COD";
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-32 text-center min-h-[70vh] flex flex-col justify-center items-center">
@@ -18,20 +19,27 @@ export default async function CheckoutSuccessPage({
         </svg>
       </div>
       
-      <h1 className="text-4xl font-extrabold tracking-tight mb-4">Payment Successful!</h1>
+      <h1 className="text-4xl font-extrabold tracking-tight mb-4">
+        {isCOD ? "Order Placed!" : "Payment Successful!"}
+      </h1>
       <p className="text-xl text-muted-foreground mb-8">
-        Thank you for your order. We are processing it and will ship it soon.
+        {isCOD
+          ? "Thank you! Your order is confirmed. Please keep cash ready at the time of delivery."
+          : "Thank you for your order. We are processing it and will ship it soon."}
       </p>
 
       {orderId && (
         <div className="bg-muted p-4 rounded-md mb-8 inline-block text-left min-w-[300px]">
           <p className="text-sm text-muted-foreground mb-1">Order Reference</p>
           <p className="font-mono font-bold text-lg">{orderId}</p>
-          {paymentId && (
+          {paymentId && !isCOD && (
             <>
               <p className="text-sm text-muted-foreground mt-4 mb-1">Payment ID</p>
               <p className="font-mono text-sm">{paymentId}</p>
             </>
+          )}
+          {isCOD && (
+            <p className="text-sm text-amber-600 font-medium mt-3">💵 Payment: Cash on Delivery</p>
           )}
         </div>
       )}

@@ -109,14 +109,14 @@ export default function ImportPage() {
       )}
 
       {status === "success" && executionData && (
-        <Card className="border-green-200">
-          <CardHeader className="bg-green-50 text-green-900 border-b border-green-200 pb-4">
+        <Card className={executionData.failedCount > 0 ? "border-amber-500" : "border-green-200"}>
+          <CardHeader className={executionData.failedCount > 0 ? "bg-amber-50 text-amber-900 border-b border-amber-200 pb-4" : "bg-green-50 text-green-900 border-b border-green-200 pb-4"}>
             <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              Import Completed Successfully
+              {executionData.failedCount > 0 ? <AlertCircle className="h-5 w-5 text-amber-600" /> : <CheckCircle2 className="h-5 w-5 text-green-600" />}
+              {executionData.failedCount > 0 ? "Import Finished with Errors" : "Import Completed Successfully"}
             </CardTitle>
-            <CardDescription className="text-green-800">
-              Your catalog and inventory have been updated.
+            <CardDescription className={executionData.failedCount > 0 ? "text-amber-800" : "text-green-800"}>
+              {executionData.failedCount > 0 ? "Some products failed to upload. Check the details below." : "Your catalog and inventory have been updated."}
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
@@ -134,6 +134,20 @@ export default function ImportPage() {
                 <p className="text-3xl font-bold text-red-600">{executionData.failedCount}</p>
               </div>
             </div>
+            
+            {executionData.failedCount > 0 && executionData.errors?.length > 0 && (
+              <div className="mb-6 rounded-md border border-red-200 bg-red-50 p-4">
+                <h4 className="text-sm font-semibold text-red-900 mb-2">Error Details:</h4>
+                <ul className="list-disc pl-5 text-sm text-red-800 space-y-1">
+                  {executionData.errors.map((err: any, idx: number) => (
+                    <li key={idx}>
+                      <span className="font-mono font-medium">{err.sku}</span>: {err.reason}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
             <Button onClick={reset} className="w-full">Upload Another File</Button>
           </CardContent>
         </Card>
@@ -149,12 +163,12 @@ export default function ImportPage() {
             <div className="space-y-2">
               <Label htmlFor="excel-upload" className="font-semibold flex items-center gap-2">
                 <FileSpreadsheet className="h-4 w-4 text-green-600" />
-                Products Excel File (.xlsx) <span className="text-red-500">*</span>
+                Products Data File (.xlsx, .csv) <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="excel-upload"
                 type="file"
-                accept=".xlsx"
+                accept=".xlsx,.csv"
                 onChange={(e) => setExcelFile(e.target.files?.[0] || null)}
               />
             </div>

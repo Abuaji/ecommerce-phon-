@@ -19,6 +19,7 @@ export type CheckoutInput = {
   items: CheckoutItemInput[];
   shippingAddress: any;
   couponCode?: string;
+  paymentMethod?: "RAZORPAY" | "COD";
 };
 
 function generateOrderNumber() {
@@ -29,7 +30,7 @@ function generateOrderNumber() {
 }
 
 export async function createCheckoutSession(input: CheckoutInput) {
-  const { customerEmail, customerPhone, items, shippingAddress, couponCode } = input;
+  const { customerEmail, customerPhone, items, shippingAddress, couponCode, paymentMethod = "RAZORPAY" } = input;
 
   if (items.length === 0) return { error: "Cart is empty" };
 
@@ -45,7 +46,7 @@ export async function createCheckoutSession(input: CheckoutInput) {
   let customer = await prisma.customer.findUnique({ where: { email: customerEmail } });
   if (!customer) {
     customer = await prisma.customer.create({
-      data: { email: customerEmail, phone: customerPhone, isGuest: true },
+      data: { email: customerEmail, ...(customerPhone !== undefined && { phone: customerPhone }), isGuest: true },
     });
   }
 
@@ -107,7 +108,7 @@ export async function createCheckoutSession(input: CheckoutInput) {
       await tx.payment.create({
         data: {
           orderId: newOrder.id,
-          provider: "RAZORPAY",
+          provider: paymentMethod,
           amount: grandTotal,
           currency: "INR",
           status: PaymentStatus.PENDING,
@@ -131,34 +132,46 @@ export async function createCheckoutSession(input: CheckoutInput) {
   }
 
   // 7. Call External API (Razorpay)
-  let razorpayOrder;
-  try {
-    razorpayOrder = await RazorpayService.createOrder(grandTotal, order.id);
-  } catch (error) {
-    console.error("Razorpay API failed", error);
-    // ROLLBACK: Mark Order Failed, Release Stock, Rollback Coupon
-    await prisma.order.update({ where: { id: order.id }, data: { status: OrderStatus.CANCELLED } });
-    await Promise.all(items.map(i => releaseReservedStock(i.sanityProductId, i.quantity, order.id)));
-    if (validCouponId) {
-      await prisma.couponRedemption.update({
-        where: { orderId: order.id },
-        data: { status: CouponRedemptionStatus.ROLLED_BACK, reservedUntil: null },
-      });
+  if (paymentMethod === "RAZORPAY") {
+    let razorpayOrder;
+    try {
+      razorpayOrder = await RazorpayService.createOrder(grandTotal, order.id);
+    } catch (error) {
+      console.error("Razorpay API failed", error);
+      // ROLLBACK: Mark Order Failed, Release Stock, Rollback Coupon
+      await prisma.order.update({ where: { id: order.id }, data: { status: OrderStatus.CANCELLED } });
+      await Promise.all(items.map(i => releaseReservedStock(i.sanityProductId, i.quantity, order.id)));
+      if (validCouponId) {
+        await prisma.couponRedemption.update({
+          where: { orderId: order.id },
+          data: { status: CouponRedemptionStatus.ROLLED_BACK, reservedUntil: null },
+        });
+      }
+      return { error: "Payment gateway initialization failed" };
     }
-    return { error: "Payment gateway initialization failed" };
+
+    // 8. Update Payment with provider ID
+    await prisma.payment.updateMany({
+      where: { orderId: order.id },
+      data: { providerOrderId: razorpayOrder.id },
+    });
+
+    return {
+      success: true,
+      data: {
+        orderId: order.id,
+        razorpayOrderId: razorpayOrder.id,
+        amount: grandTotal,
+        currency: "INR",
+      }
+    };
   }
 
-  // 8. Update Payment with provider ID
-  await prisma.payment.updateMany({
-    where: { orderId: order.id },
-    data: { providerOrderId: razorpayOrder.id },
-  });
-
+  // If COD, just return success
   return {
     success: true,
     data: {
       orderId: order.id,
-      razorpayOrderId: razorpayOrder.id,
       amount: grandTotal,
       currency: "INR",
     }

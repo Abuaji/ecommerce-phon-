@@ -11,7 +11,6 @@ export async function POST(req: Request) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
     const adminUserId = session.user.id;
 
     // Attempt to acquire lock
@@ -30,17 +29,27 @@ export async function POST(req: Request) {
       }
 
       const excelArrayBuffer = await excelFile.arrayBuffer();
-      const excelBuffer = Buffer.from(excelArrayBuffer);
+      const excelBuffer = Buffer.from(excelArrayBuffer) as unknown as Buffer;
 
       // Generate File Hash for idempotency checks
       const fileHash = crypto.createHash("sha256").update(excelBuffer).digest("hex");
 
-      // Parse Excel
+      // Parse Excel or CSV
       const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(excelBuffer);
-      const sheet = workbook.getWorksheet("Products");
+      let sheet: ExcelJS.Worksheet | undefined;
+
+      if (excelFile.name.toLowerCase().endsWith('.csv')) {
+        // Read CSV from buffer string
+        const csvString = excelBuffer.toString('utf-8');
+        sheet = await workbook.csv.read(require('stream').Readable.from([csvString]));
+      } else {
+        // @ts-ignore - ExcelJS types expect an older Buffer interface
+        await workbook.xlsx.load(excelBuffer);
+        sheet = workbook.getWorksheet("Products");
+      }
+
       if (!sheet) {
-        throw new Error("Invalid Excel file. 'Products' sheet not found.");
+        throw new Error("Invalid file. Ensure the file contains a valid sheet or is a proper CSV.");
       }
 
       const rows: ImportRow[] = [];
@@ -82,7 +91,7 @@ export async function POST(req: Request) {
       let extractedImages: any[] = [];
       if (zipFile) {
         const zipArrayBuffer = await zipFile.arrayBuffer();
-        const zipBuffer = Buffer.from(zipArrayBuffer);
+        const zipBuffer = Buffer.from(zipArrayBuffer) as unknown as Buffer;
         extractedImages = await AssetService.extractImagesFromZip(zipBuffer);
       }
 
@@ -95,12 +104,15 @@ export async function POST(req: Request) {
       );
 
       // We merge the pre-flight failures with execution failures for the final report
-      result.failures = [
-        ...previewResult.failures,
-        ...result.errors.map(e => ({ row: -1, sku: e.sku, reason: e.reason }))
-      ];
+      const responsePayload = {
+        ...result,
+        failures: [
+          ...previewResult.failures,
+          ...result.errors.map(e => ({ row: -1, sku: e.sku, reason: e.reason }))
+        ]
+      };
 
-      return NextResponse.json(result);
+      return NextResponse.json(responsePayload);
     } finally {
       // Always release lock
       await ImportService.releaseLock();

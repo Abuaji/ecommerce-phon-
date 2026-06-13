@@ -611,3 +611,19 @@ enum EmailStatus {
   SENT
   FAILED
 }
+
+// -----------------------------------------------------------------------------
+// SETTINGS DOMAIN
+// -----------------------------------------------------------------------------
+model StoreSetting {
+  key         String   @id // e.g., "store_name", "contact_email"
+  value       String   @db.Text
+  label       String   // Human-readable label, e.g. "Store Name"
+  description String?  // Helper text
+  group       String   @default("general") // "general", "payments", "shipping", "notifications"
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?  // Admin user ID who last changed it
+
+  @@map("store_settings")
+}
+

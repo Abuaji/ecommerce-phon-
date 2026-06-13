@@ -1,9 +1,11 @@
 import { readClient } from "@/sanity/lib/client";
-import { PRODUCT_BY_SLUG_QUERY } from "@/sanity/queries";
+import { PRODUCT_BY_SLUG_QUERY, RELATED_PRODUCTS_QUERY } from "@/sanity/queries";
 import { notFound } from "next/navigation";
 import { AddToCartButton } from "@/components/store/add-to-cart-button";
 import { ProductGallery } from "@/components/store/product-gallery";
 import { TrustBadges } from "@/components/store/trust-badges";
+import { TopProductsCarousel } from "@/components/store/top-products-carousel";
+import { RecentlyViewed } from "@/components/store/recently-viewed";
 import { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -43,6 +45,12 @@ export default async function ProductDetailsPage({ params }: Props) {
     notFound();
   }
 
+  // Fetch related products
+  const relatedProducts = product.category ? await readClient.fetch(RELATED_PRODUCTS_QUERY, { 
+    categoryName: product.category,
+    currentProductId: product._id
+  }).catch(() => []) : [];
+
   // Generate JSON-LD Schema for rich Google search results
   const jsonLd = {
     "@context": "https://schema.org",
@@ -81,7 +89,7 @@ export default async function ProductDetailsPage({ params }: Props) {
       />
       
       {/* Breadcrumb */}
-      <div className="border-b border-border/40 bg-white">
+      <div className="border-b border-border/20 bg-background">
         <div className="container mx-auto px-4 lg:px-8 py-4 flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
           <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
           <span>/</span>
@@ -100,7 +108,7 @@ export default async function ProductDetailsPage({ params }: Props) {
       <div className="container mx-auto px-4 lg:px-8 pt-8 lg:pt-16">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
           {/* Left Column: Gallery */}
-          <div className="w-full lg:w-1/2 shrink-0 sticky top-28 bg-white p-4 border border-border/40">
+          <div className="w-full lg:w-1/2 shrink-0 sticky top-28 bg-muted/10 p-4 border border-border/20">
             <ProductGallery images={images} alt={product.name} />
           </div>
 
@@ -144,7 +152,7 @@ export default async function ProductDetailsPage({ params }: Props) {
               <p>{product.shortDescription || product.description?.[0]?.children?.[0]?.text || "Premium mobile accessory built to last. Impeccable design meets ultimate durability."}</p>
             </div>
 
-            <Accordion type="single" collapsible className="w-full mb-10 border-t border-border/50">
+            <Accordion className="w-full mb-10 border-t border-border/50">
               <AccordionItem value="features" className="border-b border-border/50">
                 <AccordionTrigger className="text-[12px] uppercase tracking-widest font-bold hover:no-underline py-6">Features & Details</AccordionTrigger>
                 <AccordionContent className="text-sm leading-relaxed text-muted-foreground pb-6">
@@ -184,10 +192,26 @@ export default async function ProductDetailsPage({ params }: Props) {
             
           </div>
         </div>
+
+        {/* Similar Products Section */}
+        {relatedProducts && relatedProducts.length > 0 && (
+          <div className="mt-24 pt-16 border-t border-border/20">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
+                Similar Products
+              </h2>
+            </div>
+            <TopProductsCarousel products={relatedProducts} />
+          </div>
+        )}
+
+        {/* Recently Viewed Section */}
+        <RecentlyViewed currentProduct={product} />
+
       </div>
       
       {/* Trust Badges - Full Width section */}
-      <div className="mt-24 border-y border-border/50 bg-white py-20">
+      <div className="mt-24 border-y border-border/20 bg-background py-20">
         <div className="container mx-auto px-4 lg:px-8">
           <TrustBadges />
         </div>

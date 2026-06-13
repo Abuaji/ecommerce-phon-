@@ -19,13 +19,20 @@ export function StoreHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <div className="container mx-auto flex h-20 items-center justify-between px-4 lg:px-8">
+    <div className="sticky top-0 z-50 w-full">
+      {/* Announcement Bar */}
+      <div className="w-full bg-foreground text-background py-2.5 text-center text-[10px] uppercase tracking-[0.18em] font-semibold flex items-center justify-center">
+        <p>Free Shipping · Orders over ₹999 · Premium Packaging</p>
+      </div>
+      
+      {/* Main Header */}
+      <header className="w-full border-b border-border/60 bg-background/98 backdrop-blur-sm">
+        <div className="container mx-auto flex h-[68px] items-center justify-between px-4 lg:px-8">
         {/* Mobile Menu & Logo */}
         <div className="flex items-center gap-4">
           <MobileNav />
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold tracking-widest text-foreground uppercase">Lumina</span>
+            <span className="text-xl font-sans font-medium tracking-tight text-foreground uppercase">Antigravity</span>
           </Link>
         </div>
 
@@ -71,6 +78,7 @@ export function StoreHeader() {
           </Link>
         </div>
       </div>
-    </header>
+      </header>
+    </div>
   );
 }

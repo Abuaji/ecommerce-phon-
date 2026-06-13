@@ -12,14 +12,22 @@ export async function POST(req: Request) {
     }
 
     const arrayBuffer = await excelFile.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const buffer = Buffer.from(arrayBuffer) as unknown as Buffer;
 
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(buffer);
+    let sheet: ExcelJS.Worksheet | undefined;
 
-    const sheet = workbook.getWorksheet("Products");
+    if (excelFile.name.toLowerCase().endsWith('.csv')) {
+      const csvString = buffer.toString('utf-8');
+      sheet = await workbook.csv.read(require('stream').Readable.from([csvString]));
+    } else {
+      // @ts-ignore - ExcelJS types expect an older Buffer interface
+      await workbook.xlsx.load(buffer);
+      sheet = workbook.getWorksheet("Products");
+    }
+
     if (!sheet) {
-      return NextResponse.json({ error: "Invalid Excel file. 'Products' sheet not found." }, { status: 400 });
+      return NextResponse.json({ error: "Invalid file. Ensure the file contains a valid sheet or is a proper CSV." }, { status: 400 });
     }
 
     const rows: ImportRow[] = [];

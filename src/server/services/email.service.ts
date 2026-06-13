@@ -1,10 +1,15 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { prisma } from "@/lib/db";
 import { EmailStatus } from "@prisma/client";
 
-// Graceful fallback to prevent crashes if env var is missing in dev
-const resend = new Resend(process.env.RESEND_API_KEY || "re_mock_key");
-const FROM_EMAIL = "Mobile Store <no-reply@mobilestore.example.com>";
+// Nodemailer transporter configuration
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
 export class EmailService {
   /**
@@ -30,33 +35,30 @@ export class EmailService {
         return { success: true, skipped: true };
       }
 
-      // 2. Dispatch via Resend
-      let resendId: string | null = null;
+      // 2. Dispatch via Nodemailer
+      let messageId: string | null = null;
       let errorMessage: string | null = null;
       let status: EmailStatus = EmailStatus.PENDING;
 
       try {
-        if (!process.env.RESEND_API_KEY) {
+        if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
           // Dev mock bypass
-          console.log(`[EmailService - MOCK] Sending email to ${recipient}: ${subject}`);
-          resendId = "mock_resend_id_123";
+          console.log(`[EmailService - MOCK] Missing GMAIL config. Sending mock email to ${recipient}: ${subject}`);
+          messageId = "mock_gmail_id_123";
           status = EmailStatus.SENT;
         } else {
-          const { data, error } = await resend.emails.send({
-            from: FROM_EMAIL,
+          const info = await transporter.sendMail({
+            from: `"Lumina Store" <${process.env.GMAIL_USER}>`,
             to: recipient,
             subject,
             html,
           });
 
-          if (error) {
-            throw error;
-          }
-          resendId = data?.id || null;
+          messageId = info.messageId || null;
           status = EmailStatus.SENT;
         }
       } catch (err: any) {
-        console.error(`[EmailService] Resend API Failed:`, err.message);
+        console.error(`[EmailService] Nodemailer Failed:`, err.message);
         errorMessage = err.message || "Unknown Provider Error";
         status = EmailStatus.FAILED;
       }
@@ -68,7 +70,7 @@ export class EmailService {
           subject,
           idempotencyKey,
           status,
-          providerId: resendId,
+          providerId: messageId,
           errorMessage,
           entityType: entityType || null,
           entityId: entityId || null
@@ -146,5 +148,16 @@ export class EmailService {
     `;
 
     return this.sendEmailSafe(adminEmail, subject, html, idempotencyKey);
+  }
+
+  public static async sendCustomEmail(recipient: string, subject: string, message: string) {
+    const idempotencyKey = `CUSTOM_EMAIL_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const html = `
+      <div style="font-family: sans-serif; padding: 20px;">
+        <p style="white-space: pre-wrap; font-size: 15px;">${message}</p>
+      </div>
+    `;
+
+    return this.sendEmailSafe(recipient, subject, html, idempotencyKey, "Custom", undefined);
   }
 }
