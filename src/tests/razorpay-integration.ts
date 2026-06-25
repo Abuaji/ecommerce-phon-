@@ -90,7 +90,7 @@ async function main() {
   console.log("✅ Coupon Reserved");
 
   // 2. Webhook Captured
-  const webhookRes = await simulateWebhook(checkoutRes.data.razorpayOrderId, "pay_capture_123", "payment.captured");
+  const webhookRes = await simulateWebhook(checkoutRes.data.razorpayOrderId || "", "pay_capture_123", "payment.captured");
   if (webhookRes.error) throw new Error(webhookRes.error);
 
   // Assert Fulfillment
@@ -108,7 +108,7 @@ async function main() {
 
 
   console.log("\n--- TEST 2: Duplicate Webhook Idempotency ---");
-  const webhookRes2 = await simulateWebhook(checkoutRes.data.razorpayOrderId, "pay_capture_123", "payment.captured");
+  const webhookRes2 = await simulateWebhook(checkoutRes.data.razorpayOrderId || "", "pay_capture_123", "payment.captured");
   if (webhookRes2.status !== "already processed") throw new Error("Idempotency failed!");
   console.log("✅ Idempotency Verified (Duplicate blocked)");
 
@@ -122,7 +122,7 @@ async function main() {
   });
   if (checkoutFailRes.error || !checkoutFailRes.data) throw new Error(checkoutFailRes.error);
   
-  const webhookResFail = await simulateWebhook(checkoutFailRes.data.razorpayOrderId, "pay_fail_123", "payment.failed");
+  const webhookResFail = await simulateWebhook(checkoutFailRes.data.razorpayOrderId || "", "pay_fail_123", "payment.failed");
   if (webhookResFail.error) throw new Error(webhookResFail.error);
 
   // Assert Rollback

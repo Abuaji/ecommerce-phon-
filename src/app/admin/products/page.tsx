@@ -1,10 +1,10 @@
 import { requirePermission } from "@/lib/auth-utils";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+// import { Table }
 import { readClient } from "@/sanity/lib/client";
 import { ALL_PRODUCTS_QUERY } from "@/sanity/queries";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ProductRowActions } from "@/components/admin/product-row-actions";
+// import { ProductRowActions }
 import { ProductTableClient } from "@/components/admin/product-table-client";
 
 export default async function ProductsPage() {

@@ -2,7 +2,7 @@ import { requirePermission } from "@/lib/auth-utils";
 import { adminGetTrustBadges } from "@/actions/admin/trust-badge.actions";
 import { TrustBadgesClient } from "@/components/admin/trust-badges-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BadgeCheck, ShieldCheck, Truck, RotateCcw, PhoneCall } from "lucide-react";
+import { BadgeCheck, ShieldCheck, Truck, PhoneCall } from "lucide-react";
 
 export const revalidate = 0;
 

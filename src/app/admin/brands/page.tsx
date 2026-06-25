@@ -1,7 +1,7 @@
 import { requirePermission } from "@/lib/auth-utils";
 import { readClient } from "@/sanity/lib/client";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+// import { Table }
+// import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Tag, ExternalLink } from "lucide-react";

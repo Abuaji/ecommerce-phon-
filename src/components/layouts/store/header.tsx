@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { ShoppingBag, ShoppingCart, Zap, User } from "lucide-react";
 import { MobileNav } from "@/components/store/mobile-nav";
 import { SearchCommand } from "@/components/store/search-command";
 import { useCartStore } from "@/stores/cart.store";
 
 export function StoreHeader({ settings, searchSuggestions }: { settings?: any, searchSuggestions?: any[] }) {
-  const pathname = usePathname();
+  // const pathname = usePathname();
   const items = useCartStore((state) => state.items);
   const cartItemCount = items.reduce((total, item) => total + item.quantity, 0);
 

@@ -42,7 +42,7 @@ function CarouselDots() {
 
 
 export function HeroCarousel({ banners }: { banners?: any[] }) {
-  const [api, setApi] = React.useState<CarouselApi>();
+  const [, setApi] = React.useState<CarouselApi>();
 
   const fallbackBanners = [
     {

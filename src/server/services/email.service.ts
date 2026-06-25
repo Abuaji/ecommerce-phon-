@@ -99,29 +99,29 @@ export class EmailService {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>\${title}</title>
+        <title>${title}</title>
         <style>
           body { margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f5; color: #18181b; }
           .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); }
-          .header { background-color: \${brandColor}; color: #ffffff; padding: 30px 20px; text-align: center; }
+          .header { background-color: ${brandColor}; color: #ffffff; padding: 30px 20px; text-align: center; }
           .header h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 1px; }
           .content { padding: 40px 30px; font-size: 16px; line-height: 1.6; color: #3f3f46; }
           .content h2 { color: #18181b; font-size: 20px; margin-top: 0; margin-bottom: 20px; }
           .footer { background-color: #fafafa; padding: 20px; text-align: center; font-size: 13px; color: #a1a1aa; border-top: 1px solid #f4f4f5; }
-          .button { display: inline-block; padding: 12px 24px; background-color: \${brandColor}; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 500; margin-top: 20px; margin-bottom: 10px;}
-          .highlight { background-color: #f4f4f5; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid \${brandColor}; }
+          .button { display: inline-block; padding: 12px 24px; background-color: ${brandColor}; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 500; margin-top: 20px; margin-bottom: 10px;}
+          .highlight { background-color: #f4f4f5; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid ${brandColor}; }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
-            <h1>\${storeName}</h1>
+            <h1>${storeName}</h1>
           </div>
           <div class="content">
-            \${content}
+            ${content}
           </div>
           <div class="footer">
-            <p>&copy; \${new Date().getFullYear()} \${storeName}. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} ${storeName}. All rights reserved.</p>
             <p>This email was sent to you because you are a valued customer.</p>
           </div>
         </div>

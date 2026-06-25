@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { MoreHorizontal, Edit, Trash2, ExternalLink } from "lucide-react";
 import { adminDeleteProduct, adminQuickEditProduct } from "@/actions/admin/product.actions";
-import Link from "next/link";
+// import Link from "next/link";
 import { useTransition } from "react";
 
 

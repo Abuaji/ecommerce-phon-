@@ -13,7 +13,6 @@ import {
 const STATUS_LABELS: Record<OrderStatus, string> = {
   PENDING: "Pending",
   CONFIRMED: "Confirmed",
-  PROCESSING: "Processing",
   PACKED: "Packed",
   SHIPPED: "Shipped",
   OUT_FOR_DELIVERY: "Out for Delivery",
@@ -25,7 +24,6 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
 const STATUS_COLORS: Record<OrderStatus, string> = {
   PENDING: "bg-yellow-100 text-yellow-800",
   CONFIRMED: "bg-blue-100 text-blue-800",
-  PROCESSING: "bg-indigo-100 text-indigo-800",
   PACKED: "bg-violet-100 text-violet-800",
   SHIPPED: "bg-purple-100 text-purple-800",
   OUT_FOR_DELIVERY: "bg-orange-100 text-orange-800",
@@ -36,8 +34,7 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
 
 const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   PENDING: ["CONFIRMED", "CANCELLED"],
-  CONFIRMED: ["PACKED", "PROCESSING", "CANCELLED"],
-  PROCESSING: ["PACKED", "SHIPPED", "CANCELLED"],
+  CONFIRMED: ["PACKED", "CANCELLED"],
   PACKED: ["SHIPPED", "CANCELLED"],
   SHIPPED: ["OUT_FOR_DELIVERY", "RETURNED"],
   OUT_FOR_DELIVERY: ["DELIVERED", "RETURNED"],

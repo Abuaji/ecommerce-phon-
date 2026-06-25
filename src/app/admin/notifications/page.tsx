@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/auth-utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
 import { Bell } from "lucide-react";
 
 export const revalidate = 0;

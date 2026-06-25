@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { 
   Truck, ShieldCheck, RotateCcw, Star, CreditCard, Lock, 
   Zap, Gift, Package, CheckCircle2, PhoneCall, Trophy,
-  Plus, Pencil, Trash2, Eye, EyeOff, GripVertical, Save, X
+  Plus, Pencil, Trash2, GripVertical, Save, X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -108,7 +108,7 @@ function BadgeCard({ badge, onEdit, onDelete, onToggle }: {
             disabled={isPending}
             onCheckedChange={(checked) => {
               startTransition(async () => {
-                const res = await onToggle(badge._id, checked);
+                await onToggle(badge._id, checked);
                 toast.success(checked ? "Badge is now visible on storefront" : "Badge hidden from storefront");
               });
             }}
@@ -268,7 +268,7 @@ export function TrustBadgesClient({ initialBadges }: { initialBadges: BadgeItem[
   const [badges, setBadges] = useState<BadgeItem[]>(initialBadges);
   const [showForm, setShowForm] = useState(false);
   const [editingBadge, setEditingBadge] = useState<BadgeItem | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const handleCreate = async (data: FormState) => {
     const res = await adminCreateTrustBadge(data);

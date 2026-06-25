@@ -7,7 +7,7 @@ import { RotateCcw } from "lucide-react";
 
 export const revalidate = 0;
 
-const STATUS_COLORS: Record<string, string> = {
+/* const STATUS_COLORS: Record<string, string> = {
   REQUESTED: "bg-yellow-100 text-yellow-800",
   UNDER_REVIEW: "bg-blue-100 text-blue-800",
   APPROVED: "bg-green-100 text-green-800",
@@ -16,7 +16,7 @@ const STATUS_COLORS: Record<string, string> = {
   REFUND_PROCESSED: "bg-teal-100 text-teal-800",
   REPLACEMENT_SENT: "bg-indigo-100 text-indigo-800",
   CLOSED: "bg-gray-100 text-gray-800",
-};
+}; */
 
 export default async function ReturnsPage() {
   await requirePermission("ORDERS", "VIEW");

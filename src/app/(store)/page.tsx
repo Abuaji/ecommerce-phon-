@@ -1,12 +1,12 @@
 import { readClient } from "@/sanity/lib/client";
 import { NEW_ARRIVALS_QUERY, TOP_SELLING_QUERY, ALL_CATEGORIES_QUERY, ALL_PRODUCTS_QUERY, HOMEPAGE_QUERY, TRUST_BADGES_QUERY } from "@/sanity/queries";
 import Link from "next/link";
-import Image from "next/image";
+// import Image from "next/image";
 import { TopProductsCarousel } from "@/components/store/top-products-carousel";
 import { HeroCarousel } from "@/components/store/hero-carousel";
 import { TrustBadges } from "@/components/store/trust-badges";
 import { NewsletterForm } from "@/components/store/newsletter-form";
-import { ChevronRight, Grid } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 export const revalidate = 0;
 

@@ -2,13 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Search, Package } from "lucide-react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
 export function SearchCommand({ suggestions = [], iconMode = false }: { suggestions?: any[], iconMode?: boolean }) {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
+  // const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 

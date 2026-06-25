@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Image as ImageIcon, Trash2, Edit } from "lucide-react";
 import { adminGetBanners, adminDeleteBanner, adminToggleBannerActive, adminCreateBanner, adminUpdateBanner } from "@/actions/admin/banner.actions";

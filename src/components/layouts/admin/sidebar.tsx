@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, ShoppingCart, Users, Package, Settings,
-  ChevronLeft, Tag, RotateCcw, Star, Bell, BarChart2,
+  Tag, RotateCcw, Star, Bell,
   ScrollText, TrendingUp, FolderTree, Layers, FileUp, History,
-  Landmark, Zap, Search, Bookmark, BadgeCheck
+  Zap, Bookmark, BadgeCheck
 } from "lucide-react";
 
 type NavItem = {

@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+// import * as React from "react";
 import { ProductCard } from "@/components/store/product-card";
 import {
   Carousel,
