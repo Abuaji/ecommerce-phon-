@@ -20,3 +20,32 @@ export async function adminSendCustomEmail(recipientEmail: string, subject: stri
     return { error: "Failed to send custom email." };
   }
 }
+
+export async function adminSendBulkCampaign(subject: string, message: string) {
+  // Requires MARKETING permission to send campaigns
+  await requirePermission("MARKETING", "CREATE");
+
+  try {
+    const { prisma } = await import("@/lib/db");
+    const customers = await prisma.customer.findMany({
+      where: { isActive: true },
+      select: { email: true }
+    });
+
+    if (!customers.length) return { error: "No active customers found." };
+
+    // Deduplicate emails
+    const uniqueEmails = [...new Set(customers.map(c => c.email))];
+
+    // Process in batches of 10 to avoid overwhelming the provider
+    for (let i = 0; i < uniqueEmails.length; i += 10) {
+      const batch = uniqueEmails.slice(i, i + 10);
+      await Promise.allSettled(batch.map(email => EmailService.sendCustomEmail(email, subject, message)));
+    }
+
+    return { success: true, count: uniqueEmails.length };
+  } catch (error) {
+    console.error("Error sending bulk campaign:", error);
+    return { error: "Failed to start bulk campaign." };
+  }
+}

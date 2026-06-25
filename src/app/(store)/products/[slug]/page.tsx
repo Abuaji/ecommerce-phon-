@@ -6,6 +6,7 @@ import { ProductGallery } from "@/components/store/product-gallery";
 import { TrustBadges } from "@/components/store/trust-badges";
 import { TopProductsCarousel } from "@/components/store/top-products-carousel";
 import { RecentlyViewed } from "@/components/store/recently-viewed";
+import { PriceDisplay } from "@/components/store/price-display";
 import { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -90,51 +91,62 @@ export default async function ProductDetailsPage({ params }: Props) {
       
       {/* Breadcrumb */}
       <div className="border-b border-border/20 bg-background">
-        <div className="container mx-auto px-4 lg:px-8 py-4 flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+        <div className="container mx-auto px-4 lg:px-8 py-4 flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted-foreground font-semibold overflow-x-auto whitespace-nowrap scrollbar-hide">
           <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
           <span>/</span>
-          <Link href="/products" className="hover:text-foreground transition-colors">Products</Link>
+          <Link href="/products" className="hover:text-foreground transition-colors shrink-0">Products</Link>
           <span>/</span>
           {product.category && (
             <>
-              <Link href={`/categories`} className="hover:text-foreground transition-colors">{product.category}</Link>
+              <Link href={`/categories`} className="hover:text-foreground transition-colors shrink-0">{product.category}</Link>
               <span>/</span>
             </>
           )}
-          <span className="text-foreground truncate">{product.name}</span>
+          <span className="text-foreground truncate shrink-0">{product.name}</span>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 lg:px-8 pt-8 lg:pt-16">
-        <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
+      <div className="container mx-auto px-4 lg:px-8 pt-6 lg:pt-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-20">
           {/* Left Column: Gallery */}
-          <div className="w-full lg:w-1/2 shrink-0 sticky top-28 bg-muted/10 p-4 border border-border/20">
+          <div className="lg:col-span-5 xl:col-span-5 shrink-0 sticky top-28">
             <ProductGallery images={images} alt={product.name} />
           </div>
 
           {/* Right Column: Info */}
-          <div className="w-full lg:w-1/2 flex flex-col pt-4">
-            {product.brand && (
-              <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-bold mb-4">{product.brand}</span>
+          <div className="lg:col-span-7 xl:col-span-7 flex flex-col pt-0 lg:pt-4">
+            
+            {product.reviewCount > 0 && (
+              <div className="flex items-center gap-2 mb-4">
+                <span className="flex items-center text-[#F59E0B]">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" /></svg>
+                </span>
+                <span className="text-xs font-semibold text-gray-500">{product.rating} ({product.reviewCount} reviews)</span>
+              </div>
             )}
-            <h1 className="text-3xl lg:text-5xl font-bold tracking-tight mb-6 text-foreground leading-[1.1]">
+
+            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight mb-2 text-gray-900 leading-[1.1]">
               {product.name}
             </h1>
             
-            <div className="mb-10 pb-8 border-b border-border/50">
-              {product.discountPrice ? (
-                <div className="flex items-baseline gap-4">
-                  <span className="text-3xl font-semibold tracking-tight">₹{(product.discountPrice / 100).toLocaleString()}</span>
-                  <span className="text-lg line-through text-muted-foreground">₹{(product.price / 100).toLocaleString()}</span>
-                  <span className="bg-foreground text-background px-3 py-1 text-[10px] font-bold uppercase tracking-widest">Sale</span>
-                </div>
+            {product.brand && (
+              <p className="text-sm font-medium text-gray-500 mb-6">
+                Brand: <span className="text-gray-900">{product.brand}</span>
+              </p>
+            )}
+            
+            <div className="mb-8 pb-6 border-b border-gray-100 flex items-center gap-4">
+              {product.discountPrice && product.discountPrice > product.price ? (
+                <>
+                  <PriceDisplay priceInCents={product.price} size="xl" />
+                  <span className="text-xl line-through text-gray-400">{(product.discountPrice / 100).toFixed(2)}$</span>
+                </>
               ) : (
-                <span className="text-3xl font-semibold tracking-tight">₹{(product.price / 100).toLocaleString()}</span>
+                <PriceDisplay priceInCents={product.price} size="xl" />
               )}
-              <p className="text-[10px] text-muted-foreground mt-3 uppercase tracking-widest font-semibold">Inclusive of all taxes</p>
             </div>
 
-            <div className="mb-12">
+            <div className="mb-10">
               <AddToCartButton 
                 product={{
                   _id: product._id,
@@ -143,32 +155,36 @@ export default async function ProductDetailsPage({ params }: Props) {
                   discountPrice: product.discountPrice,
                   imageUrl: images[0]
                 }} 
-                className="w-full h-16 text-[11px] tracking-[0.2em] uppercase font-bold rounded-none bg-foreground text-background hover:bg-foreground/90 transition-all border-none"
+                className="w-full md:w-3/4 h-14 text-[13px] tracking-wide uppercase font-bold rounded-full bg-primary text-white hover:bg-primary/90 transition-all border-none shadow-md"
                 size="lg"
               />
             </div>
 
-            <div className="mb-12 text-sm leading-relaxed text-muted-foreground">
-              <p>{product.shortDescription || product.description?.[0]?.children?.[0]?.text || "Premium mobile accessory built to last. Impeccable design meets ultimate durability."}</p>
-            </div>
+            {(product.shortDescription || product.description?.[0]?.children?.[0]?.text) && (
+              <div className="mb-10 text-sm leading-relaxed text-gray-600">
+                <p>{product.shortDescription || product.description?.[0]?.children?.[0]?.text}</p>
+              </div>
+            )}
 
-            <Accordion className="w-full mb-10 border-t border-border/50">
-              <AccordionItem value="features" className="border-b border-border/50">
-                <AccordionTrigger className="text-[12px] uppercase tracking-widest font-bold hover:no-underline py-6">Features & Details</AccordionTrigger>
-                <AccordionContent className="text-sm leading-relaxed text-muted-foreground pb-6">
-                   <p>{product.description?.[0]?.children?.[0]?.text || "Detailed features coming soon."}</p>
-                </AccordionContent>
-              </AccordionItem>
+            <Accordion className="w-full mb-10 border-t border-gray-100">
+              {product.description?.[0]?.children?.[0]?.text && (
+                <AccordionItem value="features" className="border-b border-gray-100">
+                  <AccordionTrigger className="text-[13px] uppercase tracking-widest font-bold hover:no-underline py-6">Features & Details</AccordionTrigger>
+                  <AccordionContent className="text-sm leading-relaxed text-gray-500 pb-6">
+                     <p>{product.description[0].children[0].text}</p>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
               
               {product.specifications && product.specifications.length > 0 && (
-                <AccordionItem value="specs" className="border-b border-border/50">
-                  <AccordionTrigger className="text-[12px] uppercase tracking-widest font-bold hover:no-underline py-6">Technical Specifications</AccordionTrigger>
+                <AccordionItem value="specs" className="border-b border-gray-100">
+                  <AccordionTrigger className="text-[13px] uppercase tracking-widest font-bold hover:no-underline py-6">Technical Specifications</AccordionTrigger>
                   <AccordionContent className="pb-6">
                     <ul className="space-y-4">
                       {product.specifications.map((spec: any, i: number) => (
-                        <li key={i} className="flex grid grid-cols-3 gap-4 border-b border-border/20 pb-4 text-[13px]">
-                          <span className="font-semibold text-foreground">{spec.key}</span>
-                          <span className="col-span-2 text-muted-foreground">{spec.value}</span>
+                        <li key={i} className="flex grid grid-cols-3 gap-4 border-b border-gray-100 pb-4 text-[13px]">
+                          <span className="font-semibold text-gray-900">{spec.key}</span>
+                          <span className="col-span-2 text-gray-500">{spec.value}</span>
                         </li>
                       ))}
                     </ul>
@@ -177,10 +193,10 @@ export default async function ProductDetailsPage({ params }: Props) {
               )}
 
               {product.compatibility && product.compatibility.length > 0 && (
-                <AccordionItem value="compatibility" className="border-b border-border/50">
-                  <AccordionTrigger className="text-[12px] uppercase tracking-widest font-bold hover:no-underline py-6">Compatibility</AccordionTrigger>
+                <AccordionItem value="compatibility" className="border-b border-gray-100">
+                  <AccordionTrigger className="text-[13px] uppercase tracking-widest font-bold hover:no-underline py-6">Compatibility</AccordionTrigger>
                   <AccordionContent className="pb-6">
-                    <ul className="list-disc pl-5 space-y-2 text-[13px] text-muted-foreground">
+                    <ul className="list-disc pl-5 space-y-2 text-[13px] text-gray-500">
                       {product.compatibility.map((device: any, i: number) => (
                         <li key={i}>{device}</li>
                       ))}

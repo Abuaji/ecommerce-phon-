@@ -6,7 +6,7 @@ import {
   LayoutDashboard, ShoppingCart, Users, Package, Settings,
   ChevronLeft, Tag, RotateCcw, Star, Bell, BarChart2,
   ScrollText, TrendingUp, FolderTree, Layers, FileUp, History,
-  Landmark, Zap
+  Landmark, Zap, Search, Bookmark, BadgeCheck
 } from "lucide-react";
 
 type NavItem = {
@@ -18,26 +18,47 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
-  { label: "Reports", href: "/admin/reports", icon: <TrendingUp className="h-4 w-4" /> },
-  { label: "Insights", href: "/admin/insights", icon: <BarChart2 className="h-4 w-4" /> },
+  { label: "Reports & Insights", href: "/admin/reports", icon: <TrendingUp className="h-4 w-4" /> },
   {
-    label: "Catalog", icon: <Package className="h-4 w-4" />,
+    label: "Operations", icon: <Package className="h-4 w-4" />,
     children: [
-      { label: "Categories", href: "/admin/categories", icon: <FolderTree className="h-3.5 w-3.5" /> },
-      { label: "Brands", href: "/admin/brands", icon: <Tag className="h-3.5 w-3.5" /> },
-      { label: "All Products", href: "/admin/products", icon: <Layers className="h-3.5 w-3.5" /> },
+      { label: "Orders", href: "/admin/orders", icon: <ShoppingCart className="h-3.5 w-3.5" /> },
+      { label: "Returns", href: "/admin/returns", icon: <RotateCcw className="h-3.5 w-3.5" /> },
       { label: "Stock Levels", href: "/admin/inventory", icon: <Package className="h-3.5 w-3.5" /> },
       { label: "Bulk Import", href: "/admin/products/import", icon: <FileUp className="h-3.5 w-3.5" /> },
-      { label: "Import History", href: "/admin/import-history", icon: <History className="h-3.5 w-3.5" /> },
     ],
   },
-  { label: "Orders", href: "/admin/orders", icon: <ShoppingCart className="h-4 w-4" /> },
-  { label: "Returns", href: "/admin/returns", icon: <RotateCcw className="h-4 w-4" /> },
-  { label: "Customers", href: "/admin/customers", icon: <Users className="h-4 w-4" /> },
-  { label: "Reviews", href: "/admin/reviews", icon: <Star className="h-4 w-4" /> },
-  { label: "Marketing", href: "/admin/marketing", icon: <Zap className="h-4 w-4" /> },
-  { label: "Notifications", href: "/admin/notifications", icon: <Bell className="h-4 w-4" /> },
-  { label: "Audit Logs", href: "/admin/audit-logs", icon: <ScrollText className="h-4 w-4" /> },
+  {
+    label: "Catalog", icon: <Tag className="h-4 w-4" />,
+    children: [
+      { label: "Products", href: "/admin/products", icon: <Package className="h-3.5 w-3.5" /> },
+      { label: "Categories", href: "/admin/categories", icon: <FolderTree className="h-3.5 w-3.5" /> },
+      { label: "Brands", href: "/admin/brands", icon: <Bookmark className="h-3.5 w-3.5" /> },
+    ]
+  },
+  {
+    label: "Customers", icon: <Users className="h-4 w-4" />,
+    children: [
+      { label: "Directory", href: "/admin/customers", icon: <Users className="h-3.5 w-3.5" /> },
+      { label: "Reviews", href: "/admin/reviews", icon: <Star className="h-3.5 w-3.5" /> },
+    ]
+  },
+  {
+    label: "Marketing", icon: <Zap className="h-4 w-4" />,
+    children: [
+      { label: "Banners & Coupons", href: "/admin/marketing", icon: <Zap className="h-3.5 w-3.5" /> },
+      { label: "Trust Badges", href: "/admin/trust-badges", icon: <BadgeCheck className="h-3.5 w-3.5" /> },
+    ]
+  },
+  { label: "CMS / Content", href: "/admin/studio", icon: <Layers className="h-4 w-4" /> },
+  {
+    label: "System", icon: <Settings className="h-4 w-4" />,
+    children: [
+      { label: "Notifications", href: "/admin/notifications", icon: <Bell className="h-3.5 w-3.5" /> },
+      { label: "Audit Logs", href: "/admin/audit-logs", icon: <ScrollText className="h-3.5 w-3.5" /> },
+      { label: "Import History", href: "/admin/import-history", icon: <History className="h-3.5 w-3.5" /> },
+    ]
+  }
 ];
 
 import { useState, useEffect } from "react";
@@ -103,18 +124,15 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
   );
 }
 
-export function AdminSidebar() {
+export function SidebarContent() {
   const pathname = usePathname();
-
+  
   return (
-    <aside className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <>
       <div className="flex h-16 shrink-0 items-center justify-between px-6 border-b border-border/40">
         <Link href="/admin/dashboard" className="flex items-center gap-2">
           <span className="text-lg font-bold tracking-tighter">Lumina Admin</span>
         </Link>
-        <button className="text-muted-foreground hover:text-foreground md:hidden">
-          <ChevronLeft className="h-5 w-5" />
-        </button>
       </div>
 
       <nav className="flex-1 overflow-y-auto py-4">
@@ -138,6 +156,14 @@ export function AdminSidebar() {
           <span>Settings</span>
         </Link>
       </div>
+    </>
+  );
+}
+
+export function AdminSidebar() {
+  return (
+    <aside className="hidden md:flex fixed inset-y-0 left-0 z-50 w-64 flex-col border-r border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <SidebarContent />
     </aside>
   );
 }

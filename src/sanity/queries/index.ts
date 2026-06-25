@@ -140,3 +140,84 @@ export const CATEGORY_BY_SLUG_QUERY = `
     seoDescription
   }
 `;
+
+export const SITE_SETTINGS_QUERY = `
+  *[_type == "siteSettings"][0] {
+    brandName,
+    "logoUrl": logo.asset->url,
+    "faviconUrl": favicon.asset->url,
+    announcementBarText,
+    headerMenu[]{ label, href },
+    footerMenu[]{ title, links[]{ label, href } },
+    globalSeoTitle,
+    globalSeoDescription,
+    "defaultOpenGraphImageUrl": defaultOpenGraphImage.asset->url,
+    socialLinks[]{ platform, url }
+  }
+`;
+
+export const PAGE_BY_SLUG_QUERY = `
+  *[_type == "page" && slug.current == $slug][0] {
+    title,
+    "slug": slug.current,
+    body,
+    "seoTitle": seo.metaTitle,
+    "seoDescription": seo.metaDescription
+  }
+`;
+
+export const HOMEPAGE_QUERY = `
+  *[_type == "homepage"][0] {
+    title,
+    activeSections[]->{
+      _id,
+      sectionType,
+      sectionTitle,
+      sectionDescription,
+      "banners": banners[]->{
+        "title": heading,
+        "subtitle": subheading,
+        "imageUrl": desktopImage.asset->url,
+        "mobileImageUrl": mobileImage.asset->url,
+        "link": primaryButtonUrl,
+        "buttonText": primaryButtonText
+      }
+    }
+  }
+`;
+
+export const TRUST_BADGES_QUERY = `
+  *[_type == "trustBadge" && isActive == true] | order(displayOrder asc) {
+    _id,
+    title,
+    description,
+    icon,
+    displayOrder
+  }
+`;
+
+export const ABOUT_PAGE_QUERY = `
+  *[_type == "aboutPage"][0] {
+    title,
+    heroHeadline,
+    "heroImage": heroImage.asset->url,
+    missionStatement,
+    story,
+    "seoTitle": seo.metaTitle,
+    "seoDescription": seo.metaDescription
+  }
+`;
+
+export const CONTACT_PAGE_QUERY = `
+  *[_type == "contactPage"][0] {
+    title,
+    heroHeadline,
+    description,
+    email,
+    phone,
+    address,
+    businessHours,
+    "seoTitle": seo.metaTitle,
+    "seoDescription": seo.metaDescription
+  }
+`;

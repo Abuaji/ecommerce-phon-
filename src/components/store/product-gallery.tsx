@@ -23,42 +23,42 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
   }
 
   return (
-    <div className="flex flex-col-reverse lg:flex-row gap-4 lg:gap-6">
+    <div className="flex flex-col gap-4 lg:gap-6">
+      {/* Main Image */}
+      <div className="relative aspect-[4/5] lg:aspect-square w-full bg-[#F4F7F6]/80 rounded-[2rem] lg:rounded-[32px] overflow-hidden flex items-center justify-center p-8 border border-black/5">
+        <Image 
+          src={images[selectedImage]!} 
+          alt={alt} 
+          fill 
+          priority
+          className="object-contain p-8 transition-transform duration-700 ease-out hover:scale-105 drop-shadow-md mix-blend-multiply"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
+        />
+      </div>
+
       {/* Thumbnails */}
       {images.length > 1 && (
-        <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto pb-2 lg:pb-0 scrollbar-hide shrink-0 lg:w-24">
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide shrink-0">
           {images.map((image, idx) => (
             <button
               key={idx}
               onClick={() => setSelectedImage(idx)}
               className={cn(
-                "relative aspect-square w-20 lg:w-full overflow-hidden shrink-0 rounded-xl border-2 transition-all duration-300",
-                selectedImage === idx ? "border-primary bg-primary/5" : "border-transparent bg-muted/30 hover:bg-muted/50"
+                "relative aspect-square w-20 shrink-0 rounded-2xl border-2 transition-all duration-300 overflow-hidden",
+                selectedImage === idx ? "border-primary bg-[#F4F7F6] scale-95" : "border-transparent bg-[#F4F7F6]/50 hover:bg-[#F4F7F6]"
               )}
             >
               <Image 
                 src={image} 
                 alt={`${alt} thumbnail ${idx + 1}`} 
                 fill 
-                className="object-contain p-2"
-                sizes="(max-width: 768px) 80px, 96px"
+                className="object-contain p-2 mix-blend-multiply"
+                sizes="80px"
               />
             </button>
           ))}
         </div>
       )}
-
-      {/* Main Image */}
-      <div className="relative aspect-square w-full bg-muted/30 border border-border/20 rounded-2xl overflow-hidden flex items-center justify-center p-8">
-        <Image 
-          src={images[selectedImage]!} 
-          alt={alt} 
-          fill 
-          priority
-          className="object-contain p-8 transition-transform duration-700 ease-out hover:scale-110 drop-shadow-2xl"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
-        />
-      </div>
     </div>
   );
 }

@@ -1,57 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Edit, Trash2, ExternalLink } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle, 
+import { adminDeleteBrand, adminQuickEditBrand } from "@/actions/admin/brand.actions";
+import { Checkbox } from "@/components/ui/checkbox";
 
-} from "@/components/ui/dialog";
-import { MoreHorizontal, Edit, Trash2, ExternalLink } from "lucide-react";
-import { adminDeleteProduct, adminQuickEditProduct } from "@/actions/admin/product.actions";
-import Link from "next/link";
-import { useTransition } from "react";
-
-
-export function ProductRowActions({ product }: { product: any }) {
+export function BrandRowActions({ brand }: { brand: any }) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  
   const [formData, setFormData] = useState({
-    name: product.name || "",
-    price: product.price || 0,
-    category: product.category || "",
-    brand: product.brand || "",
+    name: brand.name || "",
+    slug: brand.slug || "",
+    isActive: brand.isActive !== false,
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const handleQuickEdit = () => {
-    if (!formData.name.trim() || !formData.category.trim()) return;
+    if (!formData.name.trim()) return;
     
     startTransition(async () => {
       const form = new FormData();
       form.append('name', formData.name);
-      form.append('price', String(formData.price));
-      form.append('category', formData.category);
-      form.append('brand', formData.brand);
+      form.append('slug', formData.slug);
+      form.append('isActive', String(formData.isActive));
       if (imageFile) {
         form.append('image', imageFile);
       }
 
-      const res = await adminQuickEditProduct(product._id, form);
+      const res = await adminQuickEditBrand(brand._id, form);
       if (res.error) {
         alert(res.error);
       } else {
@@ -60,9 +49,9 @@ export function ProductRowActions({ product }: { product: any }) {
     });
   };
 
-  const handleDeleteProduct = () => {
+  const handleDeleteBrand = () => {
     startTransition(async () => {
-      const res = await adminDeleteProduct(product._id);
+      const res = await adminDeleteBrand(brand._id);
       if (res.error) {
         alert(res.error);
       } else {
@@ -81,7 +70,7 @@ export function ProductRowActions({ product }: { product: any }) {
         <DropdownMenuContent align="end">
           <DropdownMenuItem 
             className="cursor-pointer"
-            onClick={() => window.open(`/admin/studio/intent/edit/id=${product._id};type=product`, '_self')}
+            onClick={() => window.open(`/admin/studio/intent/edit/id=${brand._id};type=brand`, '_self')}
           >
             <ExternalLink className="mr-2 h-4 w-4" />
             Full Edit (Studio)
@@ -91,10 +80,9 @@ export function ProductRowActions({ product }: { product: any }) {
             className="cursor-pointer" 
             onClick={() => {
               setFormData({
-                name: product.name || "",
-                price: product.price || 0,
-                category: product.category || "",
-                brand: product.brand || "",
+                name: brand.name || "",
+                slug: brand.slug || "",
+                isActive: brand.isActive !== false,
               });
               setImageFile(null);
               setIsEditModalOpen(true);
@@ -108,7 +96,7 @@ export function ProductRowActions({ product }: { product: any }) {
             onClick={() => setIsDeleteModalOpen(true)}
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            Delete Product
+            Delete Brand
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -117,14 +105,14 @@ export function ProductRowActions({ product }: { product: any }) {
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Quick Edit Product</DialogTitle>
+            <DialogTitle>Quick Edit Brand</DialogTitle>
             <DialogDescription>
-              Update basic details for <strong>{product.name}</strong>. For full descriptions and galleries, use the Studio.
+              Update basic details for <strong>{brand.name}</strong>.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="image" className="text-right text-xs">Main Image</Label>
+              <Label htmlFor="image" className="text-right text-xs">Logo</Label>
               <Input 
                 id="image" 
                 type="file"
@@ -145,39 +133,31 @@ export function ProductRowActions({ product }: { product: any }) {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="price" className="text-right">Price (₹)</Label>
+              <Label htmlFor="slug" className="text-right">Slug</Label>
               <Input 
-                id="price" 
-                type="number"
-                value={formData.price} 
-                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })} 
+                id="slug" 
+                value={formData.slug} 
+                onChange={(e) => setFormData({ ...formData, slug: e.target.value })} 
                 className="col-span-3" 
                 disabled={isPending}
+                placeholder="Auto-generated if empty"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="category" className="text-right">Category</Label>
-              <Input 
-                id="category" 
-                value={formData.category} 
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })} 
-                className="col-span-3" 
-                disabled={isPending}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="brand" className="text-right">Brand</Label>
-              <Input 
-                id="brand" 
-                value={formData.brand} 
-                onChange={(e) => setFormData({ ...formData, brand: e.target.value })} 
-                className="col-span-3" 
-                disabled={isPending}
-              />
+              <Label htmlFor="isActive" className="text-right">Status</Label>
+              <div className="col-span-3 flex items-center space-x-2">
+                <Checkbox 
+                  id="isActive"
+                  checked={formData.isActive}
+                  onCheckedChange={(checked) => setFormData({ ...formData, isActive: !!checked })}
+                  disabled={isPending}
+                />
+                <Label htmlFor="isActive" className="font-normal cursor-pointer">{formData.isActive ? "Active" : "Inactive"}</Label>
+              </div>
             </div>
           </div>
           <DialogFooter showCloseButton>
-            <Button onClick={handleQuickEdit} disabled={isPending || !formData.name.trim() || !formData.category.trim()}>
+            <Button onClick={handleQuickEdit} disabled={isPending || !formData.name.trim()}>
               {isPending ? "Saving..." : "Save changes"}
             </Button>
           </DialogFooter>
@@ -188,14 +168,15 @@ export function ProductRowActions({ product }: { product: any }) {
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogTitle>Delete {brand.name}?</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete <strong>{product.name}</strong> from Sanity and remove its stock records from the database.
+              Are you sure you want to delete this brand? This cannot be undone. 
+              You can only delete brands that are not currently assigned to any products.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter showCloseButton>
-            <Button variant="destructive" onClick={handleDeleteProduct} disabled={isPending}>
-              {isPending ? "Deleting..." : "Yes, delete product"}
+            <Button variant="destructive" onClick={handleDeleteBrand} disabled={isPending}>
+              {isPending ? "Deleting..." : "Yes, delete brand"}
             </Button>
           </DialogFooter>
         </DialogContent>

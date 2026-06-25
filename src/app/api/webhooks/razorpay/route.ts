@@ -93,7 +93,8 @@ export async function POST(req: NextRequest) {
           payment.orderId,
           payment.order.orderNumber,
           payment.order.customerEmailSnap,
-          payment.order.grandTotal
+          payment.order.grandTotal,
+          payment.order.discountTotal || 0
         );
       }
 

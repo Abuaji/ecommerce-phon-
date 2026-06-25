@@ -33,9 +33,9 @@ export function NewsletterForm() {
   }
 
   return (
-    <div className="py-16 md:py-24 text-center max-w-4xl mx-auto bg-zinc-950 text-white rounded-[2rem] md:rounded-[3rem] relative overflow-hidden shadow-2xl">
+    <div className="py-16 md:py-24 text-center max-w-4xl mx-auto bg-zinc-950 text-white rounded-[2rem] md:rounded-[3rem] relative overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-black/5">
       {/* Background elegant gradient/glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-2xl bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none" />
       <div className="absolute -bottom-[20%] left-1/2 -translate-x-1/2 w-[60%] h-[50%] bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
       
       <div className="relative z-10 px-6">

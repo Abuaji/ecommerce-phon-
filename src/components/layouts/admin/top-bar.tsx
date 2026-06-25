@@ -1,8 +1,37 @@
-import { Search, Bell, User } from "lucide-react";
+"use client";
+
+import { Search, Bell, User, Menu } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { SidebarContent } from "./sidebar";
+import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 export function AdminTopBar() {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Close sheet on navigation
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   return (
     <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-border/40 bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:gap-x-6 sm:px-6 lg:px-8">
+      <div className="flex md:hidden">
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <div className="-m-2.5 p-2.5 text-muted-foreground hover:text-foreground cursor-pointer flex items-center justify-center">
+              <span className="sr-only">Open sidebar</span>
+              <Menu className="h-6 w-6" aria-hidden="true" />
+            </div>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64 p-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-r border-border/40 flex flex-col">
+            <SidebarContent />
+          </SheetContent>
+        </Sheet>
+      </div>
+
       <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
         {/* Search Placeholder */}
         <form className="relative flex flex-1" action="#" method="GET">

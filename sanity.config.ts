@@ -29,11 +29,38 @@ export default defineConfig({
                   .schemaType("homepage")
                   .documentId("homepage")
               ),
+            // Singleton for Site Settings
+            S.listItem()
+              .title("Site Settings")
+              .id("siteSettings")
+              .child(
+                S.document()
+                  .schemaType("siteSettings")
+                  .documentId("siteSettings")
+              ),
+            // Singleton for About Page
+            S.listItem()
+              .title("About Page")
+              .id("aboutPage")
+              .child(
+                S.document()
+                  .schemaType("aboutPage")
+                  .documentId("aboutPage")
+              ),
+            // Singleton for Contact Page
+            S.listItem()
+              .title("Contact Page")
+              .id("contactPage")
+              .child(
+                S.document()
+                  .schemaType("contactPage")
+                  .documentId("contactPage")
+              ),
             // Divider
             S.divider(),
-            // All other document types except the singleton
+            // All other document types except singletons
             ...S.documentTypeListItems().filter(
-              (listItem) => listItem.getId() !== "homepage"
+              (listItem) => !["homepage", "siteSettings", "aboutPage", "contactPage"].includes(listItem.getId() as string)
             ),
           ]),
     }),

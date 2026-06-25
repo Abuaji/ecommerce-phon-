@@ -69,7 +69,7 @@ export async function adminUpdateOrderStatus(orderId: string, newStatus: OrderSt
     const isDeliveryEnabled = settings.find(s => s.key === "enable_delivery_emails")?.value === "true";
 
     if (newStatus === "CONFIRMED" && isConfirmEnabled) {
-      await EmailService.sendOrderConfirmation(order.id, order.orderNumber, order.customerEmailSnap, order.grandTotal);
+      await EmailService.sendOrderConfirmation(order.id, order.orderNumber, order.customerEmailSnap, order.grandTotal, order.discountTotal || 0);
     } else if (newStatus === "SHIPPED" && isShippingEnabled) {
       await EmailService.sendShippingNotification(order.id, order.orderNumber, order.customerEmailSnap);
     } else if (newStatus === "DELIVERED" && isDeliveryEnabled) {

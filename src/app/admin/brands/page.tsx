@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Tag, ExternalLink } from "lucide-react";
 
+import { BrandTableClient } from "@/components/admin/brand-table-client";
+
 export const revalidate = 60;
 
 export default async function BrandsPage() {
@@ -42,52 +44,7 @@ export default async function BrandsPage() {
         </Link>
       </div>
 
-      <div className="rounded-md border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Logo</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Slug</TableHead>
-              <TableHead>Products</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {(brands as any[]).map((brand) => (
-              <TableRow key={brand._id}>
-                <TableCell>
-                  {brand.logoUrl ? (
-                    <img src={brand.logoUrl} alt={brand.name} className="h-10 w-16 object-contain rounded-md bg-muted p-1" />
-                  ) : (
-                    <div className="h-10 w-16 rounded-md bg-muted flex items-center justify-center text-xs text-muted-foreground">No Logo</div>
-                  )}
-                </TableCell>
-                <TableCell className="font-medium">{brand.name}</TableCell>
-                <TableCell className="font-mono text-xs text-muted-foreground">{brand.slug || "—"}</TableCell>
-                <TableCell>
-                  <span className="font-semibold">{brand.productCount ?? 0}</span>
-                  <span className="text-muted-foreground text-xs ml-1">products</span>
-                </TableCell>
-                <TableCell>
-                  {brand.isActive !== false ? (
-                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Active</Badge>
-                  ) : (
-                    <Badge variant="secondary">Inactive</Badge>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-            {(!brands || brands.length === 0) && (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                  No brands found. Add brands in Sanity Studio.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <BrandTableClient brands={brands as any[]} />
     </div>
   );
 }

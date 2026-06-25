@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { AddToCartButton } from "@/components/store/add-to-cart-button";
 import { Package } from "lucide-react";
+import { PriceDisplay } from "@/components/store/price-display";
 
 interface ProductCardProps {
   product: {
@@ -20,35 +23,34 @@ export function ProductCard({ product }: ProductCardProps) {
   const slug = typeof product.slug === 'string' ? product.slug : product.slug?.current || '';
   
   return (
-    <article className="card-elegant flex flex-col group relative overflow-hidden rounded-xl">
+    <article className="group relative flex flex-col overflow-hidden rounded-xl bg-white p-4 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       {/* Image Container */}
-      <div className="relative aspect-square bg-muted/30 overflow-hidden flex items-center justify-center p-6">
+      <div className="relative aspect-[4/5] w-full overflow-hidden flex items-center justify-center p-4 bg-[#F6F7FA] rounded-xl mb-4">
         {product.imageUrl ? (
           <Link href={`/products/${slug}`} className="block w-full h-full relative z-10">
             <Image 
               src={product.imageUrl} 
               alt={product.name}
               fill
-              className="object-contain w-full h-full opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-700 ease-out drop-shadow-xl"
+              className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-500 ease-out drop-shadow-md mix-blend-multiply"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </Link>
         ) : (
           <Link href={`/products/${slug}`} className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/50 z-10 gap-3 group-hover:text-muted-foreground transition-colors">
             <Package className="w-12 h-12 stroke-[1]" />
-            <span className="font-mono text-[10px] uppercase tracking-widest">Awaiting Image</span>
           </Link>
         )}
         
         {/* Badges */}
         {product.discountPrice && (
-          <div className="absolute top-3 left-3 z-20 bg-foreground text-background font-mono text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-sm">
+          <div className="absolute top-2 left-2 z-20 bg-destructive text-white font-bold text-[10px] uppercase px-2 py-1 rounded-full shadow-sm">
             SALE
           </div>
         )}
 
         {/* Quick Add Overlay */}
-        <div className="absolute bottom-4 left-4 right-4 translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out z-20">
+        <div className="absolute bottom-2 left-2 right-2 translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out z-20">
           <AddToCartButton 
             product={{
               _id: product._id,
@@ -59,30 +61,34 @@ export function ProductCard({ product }: ProductCardProps) {
             }} 
             variant="default"
             size="sm"
-            className="w-full h-10 rounded-xl bg-foreground/95 backdrop-blur-sm text-background hover:bg-foreground font-mono tracking-widest text-[10px] uppercase transition-all duration-300 shadow-xl"
+            className="w-full h-10 rounded-md bg-primary/95 backdrop-blur-sm text-white hover:bg-primary font-bold text-[11px] uppercase transition-all duration-300 shadow-md"
           />
         </div>
       </div>
       
-      {/* Product Details */}
-      <div className="flex flex-col flex-1 relative z-20 bg-white p-4 pt-3.5">
-        <div className="mb-3 flex-1">
-          {product.brand && (
-            <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mb-1.5">{product.brand}</p>
-          )}
-          <Link href={`/products/${slug}`}>
-            <h3 className="font-semibold line-clamp-2 text-sm text-foreground tracking-tight leading-snug hover:opacity-70 transition-opacity" style={{letterSpacing: '-0.01em'}}>{product.name}</h3>
-          </Link>
-        </div>
+      {/* Product Details - eTrade Style */}
+      <div className="flex flex-col flex-1 relative z-20 items-start text-left px-2 pb-2">
         
-        <div className="mt-auto flex items-center gap-3 pt-3 border-t border-border/30">
+        <Link href={`/products/${slug}`} className="mb-1 w-full">
+          <h3 className="font-bold text-sm text-gray-800 tracking-tight leading-snug hover:text-primary transition-colors line-clamp-1 w-full">
+            {product.name}
+          </h3>
+        </Link>
+
+        {product.brand && (
+          <p className="text-[11px] font-medium text-gray-500 mb-2">
+            {product.brand}
+          </p>
+        )}
+        
+        <div className="mt-auto flex items-center justify-start gap-2 pt-2">
           {product.discountPrice ? (
             <>
-              <span className="font-mono text-sm text-foreground tracking-tight font-semibold">₹{(product.discountPrice / 100).toLocaleString()}</span>
-              <span className="font-mono text-[10px] line-through text-muted-foreground">₹{(product.price / 100).toLocaleString()}</span>
+              <PriceDisplay priceInCents={product.discountPrice} size="md" />
+              <span className="text-[11px] line-through text-gray-400">{((product.price) / 100).toFixed(2)}$</span>
             </>
           ) : (
-            <span className="font-mono text-sm text-foreground tracking-tight font-semibold">₹{(product.price / 100).toLocaleString()}</span>
+            <PriceDisplay priceInCents={product.price} size="md" />
           )}
         </div>
       </div>

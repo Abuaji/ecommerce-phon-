@@ -1,5 +1,5 @@
 import { readClient } from "@/sanity/lib/client";
-import { NEW_ARRIVALS_QUERY, TOP_SELLING_QUERY, ALL_CATEGORIES_QUERY, ALL_PRODUCTS_QUERY } from "@/sanity/queries";
+import { NEW_ARRIVALS_QUERY, TOP_SELLING_QUERY, ALL_CATEGORIES_QUERY, ALL_PRODUCTS_QUERY, HOMEPAGE_QUERY, TRUST_BADGES_QUERY } from "@/sanity/queries";
 import Link from "next/link";
 import Image from "next/image";
 import { TopProductsCarousel } from "@/components/store/top-products-carousel";
@@ -11,12 +11,27 @@ import { ChevronRight, Grid } from "lucide-react";
 export const revalidate = 0;
 
 export default async function HomePage() {
-  const [topSellingProducts, newArrivalProducts, allProducts, categories] = await Promise.all([
+  const [topSellingProducts, newArrivalProducts, allProducts, categories, homepage, allBanners, trustBadges] = await Promise.all([
     readClient.fetch(TOP_SELLING_QUERY).catch(() => []),
     readClient.fetch(NEW_ARRIVALS_QUERY).catch(() => []),
     readClient.fetch(ALL_PRODUCTS_QUERY).catch(() => []),
     readClient.fetch(ALL_CATEGORIES_QUERY).catch(() => []),
+    readClient.fetch(HOMEPAGE_QUERY).catch(() => null),
+    readClient.fetch(`*[_type == "banner" && isActive == true] | order(displayOrder asc) {
+      _id,
+      "title": heading,
+      "subtitle": subheading,
+      "imageUrl": desktopImage.asset->url,
+      "mobileImageUrl": mobileImage.asset->url,
+      "link": primaryButtonUrl,
+      "buttonText": primaryButtonText
+    }`).catch(() => []),
+    readClient.fetch(TRUST_BADGES_QUERY).catch(() => []),
   ]);
+
+  // Extract hero banners from homepage data, fallback to all active banners
+  const heroSection = homepage?.activeSections?.find((s: any) => s.sectionType === 'hero');
+  const banners = (heroSection?.banners?.length > 0) ? heroSection.banners : allBanners;
 
   // Fallbacks just in case the user hasn't tagged products in the CMS yet
   const displayTopSelling = topSellingProducts?.length > 0 ? topSellingProducts : allProducts?.slice(0, 8);
@@ -24,33 +39,34 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background selection:bg-primary/30">
       {/* Hero: Image Banner Layout */}
-      <HeroCarousel />
+      <HeroCarousel banners={banners} />
 
-      {/* Shop By Category: Circular Grid Layout */}
+      {/* Category Filter Pills */}
       {categories && categories.length > 0 && (
-        <section className="container mx-auto px-4 lg:px-8 py-20 md:py-28 w-full border-b border-border/20">
-          <div className="flex items-center justify-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-foreground">Shop by Category</h2>
-          </div>
-          
-          <div className="flex flex-wrap justify-center gap-x-8 gap-y-10 max-w-6xl mx-auto">
-            {categories.slice(0, 6).map((category: any) => (
-              <Link key={category._id} href={`/categories/${category.slug}`} className="group flex flex-col items-center text-center">
-                <div className="relative w-32 h-32 md:w-40 md:h-40 overflow-hidden rounded-full bg-zinc-100 border border-border/30 transition-all duration-300 group-hover:border-zinc-300 group-hover:shadow-lg mb-4 flex items-center justify-center">
-                  {category.imageUrl ? (
-                    <Image 
-                      src={category.imageUrl} 
-                      alt={category.name} 
-                      fill 
-                      className="object-cover group-hover:scale-110 transition-transform duration-500 ease-out opacity-80 group-hover:opacity-100" 
-                    />
-                  ) : (
-                    <Grid className="w-10 h-10 text-zinc-400 stroke-[1.5]" />
-                  )}
-                </div>
-                <span className="font-sans text-sm font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors">{category.name}</span>
+        <section className="container mx-auto px-4 lg:px-8 py-6 w-full max-w-7xl">
+          <div className="flex items-center gap-3 overflow-x-auto pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {/* "All" or "Recommended" default pill */}
+            <Link 
+              href="/products" 
+              className="flex-none px-6 py-2.5 rounded-full text-sm font-semibold transition-colors bg-primary text-primary-foreground shadow-md"
+            >
+              All Categories
+            </Link>
+            
+            {categories.map((category: any) => (
+              <Link 
+                key={category._id} 
+                href={`/categories/${category.slug}`} 
+                className="flex-none px-6 py-2.5 rounded-full text-sm font-semibold transition-colors bg-white text-gray-600 hover:bg-gray-100 shadow-sm border border-gray-100"
+              >
+                {category.name}
               </Link>
             ))}
+            
+            <button className="flex-none px-6 py-2.5 rounded-full text-sm font-semibold bg-white text-gray-600 hover:bg-gray-100 shadow-sm border border-gray-100 ml-auto flex items-center gap-2">
+              Sort by
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
           </div>
         </section>
       )}
@@ -101,7 +117,7 @@ export default async function HomePage() {
 
       {/* Trust Badges */}
       <section className="container mx-auto px-4 lg:px-8 py-20 border-t border-border/20">
-        <TrustBadges />
+        <TrustBadges badges={trustBadges} />
       </section>
 
       {/* Newsletter */}

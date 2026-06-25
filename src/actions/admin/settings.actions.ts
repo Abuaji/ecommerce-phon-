@@ -19,6 +19,15 @@ const DEFAULT_SETTINGS = [
   { key: "enable_order_confirm_emails", value: "true", label: "Enable Order Confirmations", description: "Automatically send order confirmation emails upon successful checkout", group: "notifications" },
   { key: "enable_shipping_emails", value: "true", label: "Enable Shipping Notifications", description: "Automatically send shipping emails when order status changes to SHIPPED", group: "notifications" },
   { key: "enable_delivery_emails", value: "true", label: "Enable Delivery Notifications", description: "Automatically send delivery emails when order status changes to DELIVERED", group: "notifications" },
+  { key: "email_store_name", value: "LUMINA STORE", label: "Email Brand Name", description: "The brand name displayed in the header of automated emails", group: "email" },
+  { key: "email_brand_color", value: "#000000", label: "Email Brand Color", description: "Hex color code for email headers and buttons (e.g. #000000 or #be185d)", group: "email" },
+  // Pages Configuration
+  { key: "about_hero_headline", value: "Our Story", label: "About Hero Headline", description: "The main headline displayed on the About page", group: "pages" },
+  { key: "about_mission_statement", value: "Providing the best mobile accessories to empower your digital life.", label: "About Mission Statement", description: "Short summary on the About page", group: "pages" },
+  { key: "about_story", value: "We started in a small garage with a big dream...", label: "Our Story Text", description: "The main body content of the About page", group: "pages", isMultiline: true },
+  { key: "contact_description", value: "We'd love to hear from you!", label: "Contact Description", description: "Short text on the Contact page", group: "pages" },
+  { key: "contact_address", value: "123 Tech Lane, Silicon Valley, CA 94025", label: "Business Address", description: "The physical address displayed on the Contact page", group: "pages", isMultiline: true },
+  { key: "contact_business_hours", value: "Mon-Fri, 9am - 6pm EST", label: "Business Hours", description: "e.g. Mon-Fri, 9am - 6pm EST", group: "pages" },
 ];
 
 export async function adminGetSettings() {
@@ -34,6 +43,15 @@ export async function adminGetSettings() {
   }));
 }
 
+export async function getPublicSettings() {
+  const existing = await prisma.storeSetting.findMany();
+  const existingMap = new Map(existing.map(s => [s.key, s]));
+  return DEFAULT_SETTINGS.map(def => ({
+    ...def,
+    value: existingMap.get(def.key)?.value ?? def.value,
+  }));
+}
+
 export async function adminUpsertSetting(key: string, value: string) {
   await requirePermission("SETTINGS", "UPDATE");
   const session = await auth();
@@ -44,14 +62,14 @@ export async function adminUpsertSetting(key: string, value: string) {
 
   await prisma.storeSetting.upsert({
     where: { key },
-    update: { value, updatedBy: adminId },
+    update: { value, updatedBy: adminId ?? null },
     create: {
       key,
       value,
       label: def.label,
       description: def.description,
       group: def.group,
-      updatedBy: adminId,
+      updatedBy: adminId ?? null,
     },
   });
 

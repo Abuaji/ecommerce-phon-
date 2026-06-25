@@ -6,10 +6,20 @@ import { cn } from "@/lib/utils";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 const geistMono = Geist_Mono({subsets:['latin'],variable:'--font-mono'});
 
-export const metadata: Metadata = {
-  title: "Antigravity | Premium Mobile Accessories",
-  description: "Precision-engineered gear for your devices.",
-};
+import { readClient } from "@/sanity/lib/client";
+import { SITE_SETTINGS_QUERY } from "@/sanity/queries";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await readClient.fetch(SITE_SETTINGS_QUERY).catch(() => null);
+  
+  return {
+    title: settings?.globalSeoTitle || "Antigravity | Premium Mobile Accessories",
+    description: settings?.globalSeoDescription || "Precision-engineered gear for your devices.",
+    openGraph: settings?.defaultOpenGraphImageUrl ? {
+      images: [{ url: settings.defaultOpenGraphImageUrl }]
+    } : undefined
+  };
+}
 
 export default function RootLayout({
   children,

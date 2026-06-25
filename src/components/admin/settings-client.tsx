@@ -10,6 +10,7 @@ type Setting = {
   label: string;
   description?: string | null;
   group: string;
+  isMultiline?: boolean;
   updatedAt: Date | null;
   updatedBy: string | null;
 };
@@ -75,14 +76,24 @@ function SettingRow({ setting }: { setting: Setting }) {
           </button>
         ) : editing ? (
           <>
-            <input
-              type="text"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              className="border rounded-md px-3 py-1.5 text-sm bg-background w-64 focus:outline-none focus:ring-2 focus:ring-primary"
-              autoFocus
-              onKeyDown={(e) => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") handleCancel(); }}
-            />
+            {setting.isMultiline ? (
+              <textarea
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                className="border rounded-md px-3 py-2 text-sm bg-background w-[400px] h-32 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                autoFocus
+                onKeyDown={(e) => { if (e.key === "Escape") handleCancel(); }}
+              />
+            ) : (
+              <input
+                type="text"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                className="border rounded-md px-3 py-1.5 text-sm bg-background w-64 focus:outline-none focus:ring-2 focus:ring-primary"
+                autoFocus
+                onKeyDown={(e) => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") handleCancel(); }}
+              />
+            )}
             <button onClick={handleSave} disabled={isPending} className="p-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
               <Check className="h-4 w-4" />
             </button>
@@ -104,25 +115,51 @@ function SettingRow({ setting }: { setting: Setting }) {
 }
 
 export function SettingsClient({ settings }: { settings: Setting[] }) {
-  const groups = [...new Set(settings.map((s) => s.group))];
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const filteredSettings = settings.filter(s => {
+    const q = searchQuery.toLowerCase();
+    return s.label.toLowerCase().includes(q) || 
+           s.key.toLowerCase().includes(q) || 
+           (s.description?.toLowerCase() || "").includes(q);
+  });
+
+  const groups = [...new Set(filteredSettings.map((s) => s.group))];
 
   const groupLabels: Record<string, string> = {
     general: "General",
     payments: "Payments",
     shipping: "Shipping",
     notifications: "Notifications",
+    email: "Email Theme UI",
+    pages: "Pages (About & Contact)",
   };
 
   return (
     <div className="space-y-8 max-w-4xl">
-      {groups.map((group) => (
-        <div key={group} className="bg-card border rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-4 pb-2 border-b">{groupLabels[group] || group}</h2>
-          {settings.filter((s) => s.group === group).map((s) => (
-            <SettingRow key={s.key} setting={s} />
-          ))}
-        </div>
-      ))}
+      <div className="relative">
+        <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input
+          type="text"
+          placeholder="Search settings..."
+          className="w-full pl-9 pr-4 py-2 border rounded-md bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      {groups.length === 0 ? (
+        <p className="text-muted-foreground text-sm py-4">No settings match your search.</p>
+      ) : (
+        groups.map((group) => (
+          <div key={group} className="bg-card border rounded-xl p-6">
+            <h2 className="text-lg font-semibold mb-4 pb-2 border-b">{groupLabels[group] || group}</h2>
+            {filteredSettings.filter((s) => s.group === group).map((s) => (
+              <SettingRow key={s.key} setting={s} />
+            ))}
+          </div>
+        ))
+      )}
     </div>
   );
 }
