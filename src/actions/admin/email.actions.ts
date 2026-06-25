@@ -34,13 +34,19 @@ export async function adminSendBulkCampaign(subject: string, message: string) {
 
     if (!customers.length) return { error: "No active customers found." };
 
-    // Deduplicate emails
-    const uniqueEmails = [...new Set(customers.map((c: { email: string }) => c.email))];
+    // Deduplicate emails — explicitly typed as string[] so batch items are strongly typed
+    const uniqueEmails: string[] = [
+      ...new Set(
+        customers
+          .map((c: { email: string | null }) => c.email)
+          .filter((e): e is string => e !== null && e !== undefined)
+      )
+    ];
 
     // Process in batches of 10 to avoid overwhelming the provider
     for (let i = 0; i < uniqueEmails.length; i += 10) {
-      const batch = uniqueEmails.slice(i, i + 10);
-      await Promise.allSettled(batch.map(email => EmailService.sendCustomEmail(email, subject, message)));
+      const batch: string[] = uniqueEmails.slice(i, i + 10);
+      await Promise.allSettled(batch.map((email: string) => EmailService.sendCustomEmail(email, subject, message)));
     }
 
     return { success: true, count: uniqueEmails.length };
