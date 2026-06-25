@@ -194,7 +194,7 @@ function BadgeForm({
 
             <div className="space-y-2">
               <Label htmlFor="badge-icon">Icon</Label>
-              <Select value={form.icon} onValueChange={(v) => setForm({ ...form, icon: v })}>
+              <Select value={form.icon} onValueChange={(v) => setForm({ ...form, icon: v ?? "" })}>
                 <SelectTrigger id="badge-icon">
                   <SelectValue />
                 </SelectTrigger>
