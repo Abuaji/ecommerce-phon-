@@ -35,7 +35,7 @@ export async function adminSendBulkCampaign(subject: string, message: string) {
     if (!customers.length) return { error: "No active customers found." };
 
     // Deduplicate emails
-    const uniqueEmails = [...new Set(customers.map(c => c.email))];
+    const uniqueEmails = [...new Set(customers.map((c: { email: string }) => c.email))];
 
     // Process in batches of 10 to avoid overwhelming the provider
     for (let i = 0; i < uniqueEmails.length; i += 10) {
