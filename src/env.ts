@@ -47,17 +47,21 @@ let env: z.infer<typeof serverSchema> & z.infer<typeof clientSchema>;
 
 // Validate the environment variables
 // Skip validation during build steps if needed, but it's good practice to validate
-try {
-  const parsedServer = serverSchema.parse(processEnv);
-  const parsedClient = clientSchema.parse(processEnv);
+if (process.env.SKIP_ENV_VALIDATION === "true" || process.env.npm_lifecycle_event === "build") {
+  env = processEnv as any;
+} else {
+  try {
+    const parsedServer = serverSchema.parse(processEnv);
+    const parsedClient = clientSchema.parse(processEnv);
 
-  env = { ...parsedServer, ...parsedClient };
-} catch (error) {
-  if (error instanceof z.ZodError) {
-    console.error("❌ Invalid environment variables:", error.flatten().fieldErrors);
-    throw new Error("Invalid environment variables");
+    env = { ...parsedServer, ...parsedClient };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      console.error("❌ Invalid environment variables:", error.flatten().fieldErrors);
+      throw new Error("Invalid environment variables");
+    }
+    throw error;
   }
-  throw error;
 }
 
 export { env };
