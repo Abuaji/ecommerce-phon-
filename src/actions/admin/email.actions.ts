@@ -34,11 +34,16 @@ export async function adminSendBulkCampaign(subject: string, message: string) {
 
     if (!customers.length) return { error: "No active customers found." };
 
-    // Deduplicate emails — use explicit Set<string> + Array.from to preserve type
-    const filteredEmails: string[] = customers
-      .map((c: { email: string | null }) => c.email)
-      .filter((e): e is string => e !== null && e !== undefined);
-    const uniqueEmails: string[] = Array.from(new Set<string>(filteredEmails));
+    // Deduplicate emails using explicit loop — avoids Set spread inference issues
+    const seenEmails = new Set<string>();
+    const uniqueEmails: string[] = [];
+    for (const customer of customers) {
+      const email: string = customer.email;
+      if (!seenEmails.has(email)) {
+        seenEmails.add(email);
+        uniqueEmails.push(email);
+      }
+    }
 
     // Process in batches of 10 to avoid overwhelming the provider
     for (let i = 0; i < uniqueEmails.length; i += 10) {
