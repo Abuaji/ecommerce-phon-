@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { AdminStatus, AuditAction, Prisma } from "@prisma/client";
+import { AdminStatus, AuditAction } from "@prisma/client";
 
 export class AdminRepository {
   /**
