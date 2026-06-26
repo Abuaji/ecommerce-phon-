@@ -44,7 +44,14 @@ export async function adminGetSettings() {
 }
 
 export async function getPublicSettings() {
-  const existing = await prisma.storeSetting.findMany();
+  let existing: any[] = [];
+  try {
+    // If DB is unreachable during build (e.g. missing DATABASE_URL), fallback gracefully
+    existing = await prisma.storeSetting.findMany();
+  } catch (error) {
+    console.warn("Could not fetch store settings from DB (likely during build). Using defaults.");
+  }
+  
   const existingMap = new Map(existing.map(s => [s.key, s]));
   return DEFAULT_SETTINGS.map(def => ({
     ...def,
