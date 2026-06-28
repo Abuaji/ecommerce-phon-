@@ -9,9 +9,9 @@ export function StoreFooter({ settings }: { settings?: any }) {
           {/* Brand & Description (Takes up 4 columns on large screens) */}
           <div className="md:col-span-12 lg:col-span-4 flex flex-col items-start">
             {settings?.logoUrl ? (
-              <img src={settings.logoUrl} alt={settings?.brandName || "Antigravity"} className="h-8 object-contain mb-4" />
+              <img src={settings.logoUrl} alt={settings?.brandName || "Lumina"} className="h-8 object-contain mb-4" />
             ) : (
-              <h3 className="text-2xl font-bold tracking-tight mb-4 text-foreground">{settings?.brandName || "Antigravity"}</h3>
+              <h3 className="text-2xl font-bold tracking-tight mb-4 text-foreground">{settings?.brandName || "Lumina"}</h3>
             )}
             <p className="text-sm leading-relaxed text-muted-foreground max-w-xs mb-8">
               {settings?.globalSeoDescription || "Engineered for perfection. We design premium mobile accessories that blend timeless aesthetics with military-grade durability."}
@@ -81,7 +81,7 @@ export function StoreFooter({ settings }: { settings?: any }) {
         {/* Bottom Bar */}
         <div className="mt-16 pt-8 border-t border-border/20 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            © {new Date().getFullYear()} {settings?.brandName || "Antigravity"}. All rights reserved.
+            © {new Date().getFullYear()} {settings?.brandName || "Lumina"}. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Designed in California</p>

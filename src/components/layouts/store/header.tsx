@@ -24,11 +24,11 @@ export function StoreHeader({ settings, searchSuggestions }: { settings?: any, s
               </div>
               <Link href="/" className="flex items-center gap-2 group">
                 {settings?.logoUrl ? (
-                  <img src={settings.logoUrl} alt={settings?.brandName || "Antigravity"} className="h-8 object-contain" />
+                  <img src={settings.logoUrl} alt={settings?.brandName || "Lumina"} className="h-8 object-contain" />
                 ) : (
                   <span className="text-xl lg:text-2xl font-sans font-bold tracking-tight text-white flex items-center gap-2">
                     <ShoppingCart className="w-6 h-6 text-accent group-hover:scale-110 transition-transform" />
-                    {settings?.brandName || "Antigravity"}
+                    {settings?.brandName || "Lumina"}
                   </span>
                 )}
               </Link>

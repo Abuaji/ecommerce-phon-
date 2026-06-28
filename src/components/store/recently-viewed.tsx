@@ -3,7 +3,7 @@
 import * as React from "react";
 import { TopProductsCarousel } from "@/components/store/top-products-carousel";
 
-const RECENTLY_VIEWED_KEY = "antigravity_recently_viewed";
+const RECENTLY_VIEWED_KEY = "lumina_recently_viewed";
 
 interface RecentlyViewedProps {
   currentProduct: any;

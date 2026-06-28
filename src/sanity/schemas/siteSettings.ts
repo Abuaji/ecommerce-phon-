@@ -19,7 +19,7 @@ export const siteSettings = {
       type: "string",
       group: "branding",
       validation: (Rule: any) => Rule.required(),
-      initialValue: "Antigravity",
+      initialValue: "Lumina",
     },
     {
       name: "logo",

@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await readClient.fetch(SITE_SETTINGS_QUERY).catch(() => null);
   
   return {
-    title: settings?.globalSeoTitle || "Antigravity | Premium Mobile Accessories",
+    title: settings?.globalSeoTitle || "Lumina | Premium Mobile Accessories",
     description: settings?.globalSeoDescription || "Precision-engineered gear for your devices.",
     openGraph: settings?.defaultOpenGraphImageUrl ? {
       images: [{ url: settings.defaultOpenGraphImageUrl }]
