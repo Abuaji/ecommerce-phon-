@@ -38,28 +38,34 @@ export function TrustBadges({ badges }: { badges?: Badge[] }) {
   const displayBadges = badges && badges.length > 0 ? badges : FALLBACK_BADGES;
   const colCount = Math.min(displayBadges.length, 4);
 
+  const gridColsClass = {
+    1: 'md:grid-cols-1',
+    2: 'md:grid-cols-2',
+    3: 'md:grid-cols-3',
+    4: 'md:grid-cols-4',
+  }[colCount] || 'md:grid-cols-4';
+
   return (
     <div
-      className={`grid grid-cols-1 sm:grid-cols-2 gap-6 py-8 max-w-5xl mx-auto`}
-      style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}
+      className={`grid grid-cols-2 gap-3 sm:gap-6 py-6 sm:py-8 max-w-5xl mx-auto px-4 sm:px-0 ${gridColsClass}`}
     >
       {displayBadges.map((badge, idx) => (
         <div
           key={badge._id ?? idx}
-          className="group relative flex flex-col items-center text-center p-10 rounded-3xl bg-zinc-50/80 border border-border/40 hover:bg-zinc-100 transition-all duration-500 overflow-hidden"
+          className="group relative flex flex-col items-center text-center p-4 sm:p-10 rounded-2xl sm:rounded-3xl bg-zinc-50/80 border border-border/40 hover:bg-zinc-100 transition-all duration-500 overflow-hidden"
         >
           {/* Subtle hover gradient */}
           <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/[0.02] group-hover:to-black/[0.04] transition-colors duration-500 pointer-events-none" />
 
-          <div className="text-foreground/80 group-hover:text-foreground group-hover:scale-110 transition-all duration-500 mb-6 relative z-10">
-            {ICON_MAP[badge.icon] ?? <ShieldCheck className="h-7 w-7 stroke-[1.25]" />}
+          <div className="text-foreground/80 group-hover:text-foreground group-hover:scale-110 transition-all duration-500 mb-3 sm:mb-6 relative z-10">
+            {ICON_MAP[badge.icon] ?? <ShieldCheck className="h-6 w-6 sm:h-7 sm:w-7 stroke-[1.25]" />}
           </div>
 
-          <div className="relative z-10">
-            <h4 className="text-[11px] uppercase tracking-[0.15em] font-bold text-foreground mb-3">
+          <div className="relative z-10 flex flex-col items-center justify-center h-full">
+            <h4 className="text-[9px] sm:text-[11px] uppercase tracking-[0.1em] sm:tracking-[0.15em] font-bold text-foreground mb-1.5 sm:mb-3">
               {badge.title}
             </h4>
-            <p className="text-[13px] text-muted-foreground max-w-[200px] leading-relaxed">
+            <p className="text-[10px] sm:text-[13px] text-muted-foreground max-w-[200px] leading-snug sm:leading-relaxed">
               {badge.description}
             </p>
           </div>

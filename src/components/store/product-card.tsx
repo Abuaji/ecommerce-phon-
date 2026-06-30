@@ -23,9 +23,9 @@ export function ProductCard({ product }: ProductCardProps) {
   const slug = typeof product.slug === 'string' ? product.slug : product.slug?.current || '';
   
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-xl bg-white p-4 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+    <article className="group relative flex flex-col overflow-hidden rounded-xl bg-white p-2.5 md:p-4 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       {/* Image Container */}
-      <div className="relative aspect-[4/5] w-full overflow-hidden flex items-center justify-center p-4 bg-[#F6F7FA] rounded-xl mb-4">
+      <div className="relative aspect-[4/5] w-full overflow-hidden flex items-center justify-center p-2 md:p-4 bg-[#F6F7FA] rounded-xl mb-3 md:mb-4">
         {product.imageUrl ? (
           <Link href={`/products/${slug}`} className="block w-full h-full relative z-10">
             <Image 
@@ -67,28 +67,32 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
       
       {/* Product Details - eTrade Style */}
-      <div className="flex flex-col flex-1 relative z-20 items-start text-left px-2 pb-2">
+      <div className="flex flex-col flex-1 relative z-20 items-start text-left px-1 md:px-2 pb-1 md:pb-2">
         
         <Link href={`/products/${slug}`} className="mb-1 w-full">
-          <h3 className="font-bold text-sm text-gray-800 tracking-tight leading-snug hover:text-primary transition-colors line-clamp-1 w-full">
+          <h3 className="font-bold text-xs md:text-sm text-gray-800 tracking-tight leading-snug hover:text-primary transition-colors line-clamp-2 md:line-clamp-1 w-full">
             {product.name}
           </h3>
         </Link>
 
         {product.brand && (
-          <p className="text-[11px] font-medium text-gray-500 mb-2">
+          <p className="text-[9px] md:text-[11px] font-medium text-gray-500 mb-1.5 md:mb-2 line-clamp-1">
             {product.brand}
           </p>
         )}
         
-        <div className="mt-auto flex items-center justify-start gap-2 pt-2">
+        <div className="mt-auto flex flex-wrap items-center justify-start gap-1.5 md:gap-2 pt-1 md:pt-2">
           {product.discountPrice ? (
             <>
-              <PriceDisplay priceInCents={product.discountPrice} size="md" />
-              <span className="text-[11px] line-through text-gray-400">{((product.price) / 100).toFixed(2)}$</span>
+              <PriceDisplay priceInCents={product.discountPrice} size="sm" className="md:hidden" />
+              <PriceDisplay priceInCents={product.discountPrice} size="md" className="hidden md:inline-flex" />
+              <span className="text-[10px] md:text-[11px] line-through text-gray-400">{((product.price) / 100).toFixed(2)}$</span>
             </>
           ) : (
-            <PriceDisplay priceInCents={product.price} size="md" />
+            <>
+              <PriceDisplay priceInCents={product.price} size="sm" className="md:hidden" />
+              <PriceDisplay priceInCents={product.price} size="md" className="hidden md:inline-flex" />
+            </>
           )}
         </div>
       </div>

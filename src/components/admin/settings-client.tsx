@@ -133,6 +133,7 @@ export function SettingsClient({ settings }: { settings: Setting[] }) {
     notifications: "Notifications",
     email: "Email Theme UI",
     pages: "Pages (About & Contact)",
+    social: "Social Media Links",
   };
 
   return (

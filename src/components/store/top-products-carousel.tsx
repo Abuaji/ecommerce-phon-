@@ -23,9 +23,9 @@ export function TopProductsCarousel({ products }: TopProductsCarouselProps) {
       }}
       className="w-full"
     >
-      <CarouselContent className="-ml-2 md:-ml-4">
+      <CarouselContent className="-ml-3 sm:-ml-4">
         {products.map((product) => (
-          <CarouselItem key={product._id} className="pl-4 basis-[80%] sm:basis-[45%] md:basis-1/3 lg:basis-1/4 xl:basis-1/4">
+          <CarouselItem key={product._id} className="pl-3 sm:pl-4 basis-[45%] sm:basis-[45%] md:basis-1/3 lg:basis-1/4 xl:basis-1/4">
             <div className="h-full">
               <ProductCard product={product} />
             </div>

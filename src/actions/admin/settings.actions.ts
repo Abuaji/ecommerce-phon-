@@ -28,6 +28,11 @@ const DEFAULT_SETTINGS = [
   { key: "contact_description", value: "We'd love to hear from you!", label: "Contact Description", description: "Short text on the Contact page", group: "pages" },
   { key: "contact_address", value: "123 Tech Lane, Silicon Valley, CA 94025", label: "Business Address", description: "The physical address displayed on the Contact page", group: "pages", isMultiline: true },
   { key: "contact_business_hours", value: "Mon-Fri, 9am - 6pm EST", label: "Business Hours", description: "e.g. Mon-Fri, 9am - 6pm EST", group: "pages" },
+  // Social Links
+  { key: "social_instagram", value: "https://instagram.com", label: "Instagram URL", description: "Link to your Instagram profile", group: "social" },
+  { key: "social_twitter", value: "https://twitter.com", label: "Twitter / X URL", description: "Link to your Twitter profile", group: "social" },
+  { key: "social_facebook", value: "https://facebook.com", label: "Facebook URL", description: "Link to your Facebook page", group: "social" },
+  { key: "social_youtube", value: "https://youtube.com", label: "YouTube URL", description: "Link to your YouTube channel", group: "social" },
 ];
 
 export async function adminGetSettings() {
